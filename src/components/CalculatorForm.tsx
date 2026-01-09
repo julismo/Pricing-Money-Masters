@@ -25,7 +25,8 @@ interface CalculatorFormProps {
 }
 
 export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
-  const [callsPerWeek, setCallsPerWeek] = useState<string>('');
+  const [callsAmount, setCallsAmount] = useState<string>('');
+  const [callsPeriod, setCallsPeriod] = useState<string>('week');
   const [callDuration, setCallDuration] = useState<string>('2');
   const [cutDuration, setCutDuration] = useState<string>('30');
   const [averageTicket, setAverageTicket] = useState<string>('');
@@ -35,8 +36,8 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
   const validate = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!callsPerWeek || Number(callsPerWeek) <= 0) {
-      newErrors.callsPerWeek = 'Introduz um número válido';
+    if (!callsAmount || Number(callsAmount) <= 0) {
+      newErrors.callsAmount = 'Introduz um número válido';
     }
     if (!cutDuration || Number(cutDuration) <= 0) {
       newErrors.cutDuration = 'Introduz um número válido';
@@ -54,8 +55,13 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
 
     if (!validate()) return;
 
+    // Convert to weekly if user selected daily
+    const callsPerWeek = callsPeriod === 'day' 
+      ? Number(callsAmount) * 7 
+      : Number(callsAmount);
+
     onCalculate({
-      callsPerWeek: Number(callsPerWeek),
+      callsPerWeek,
       callDuration: Number(callDuration),
       cutDuration: Number(cutDuration),
       averageTicket: Number(averageTicket),
@@ -68,21 +74,32 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
       <CardContent className="p-6 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Calls per week */}
+            {/* Calls amount with period selector */}
             <div className="space-y-2">
-              <Label htmlFor="callsPerWeek" className="text-sm font-medium">
-                Quantas chamadas recebe por semana?
+              <Label htmlFor="callsAmount" className="text-sm font-medium">
+                Quantas chamadas recebe em média?
               </Label>
-              <Input
-                id="callsPerWeek"
-                type="number"
-                placeholder="Ex: 15"
-                value={callsPerWeek}
-                onChange={(e) => setCallsPerWeek(e.target.value)}
-                className={errors.callsPerWeek ? 'border-loss' : ''}
-              />
-              {errors.callsPerWeek && (
-                <p className="text-xs text-loss">{errors.callsPerWeek}</p>
+              <div className="flex gap-2">
+                <Input
+                  id="callsAmount"
+                  type="number"
+                  placeholder="Ex: 15"
+                  value={callsAmount}
+                  onChange={(e) => setCallsAmount(e.target.value)}
+                  className={`flex-1 ${errors.callsAmount ? 'border-loss' : ''}`}
+                />
+                <Select value={callsPeriod} onValueChange={setCallsPeriod}>
+                  <SelectTrigger className="w-[130px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="day">por dia</SelectItem>
+                    <SelectItem value="week">por semana</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {errors.callsAmount && (
+                <p className="text-xs text-loss">{errors.callsAmount}</p>
               )}
             </div>
 
