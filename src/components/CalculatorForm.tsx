@@ -56,8 +56,8 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
     if (!validate()) return;
 
     // Convert to weekly if user selected daily
-    const callsPerWeek = callsPeriod === 'day' 
-      ? Number(callsAmount) * 7 
+    const callsPerWeek = callsPeriod === 'day'
+      ? Number(callsAmount) * 7
       : Number(callsAmount);
 
     onCalculate({
@@ -77,7 +77,7 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
             {/* Calls amount with period selector */}
             <div className="space-y-2">
               <Label htmlFor="callsAmount" className="text-sm font-medium">
-                Quantas chamadas recebe em média?
+                Chamadas Recebidas
               </Label>
               <div className="flex gap-2">
                 <Input
@@ -106,7 +106,7 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
             {/* Call duration */}
             <div className="space-y-2">
               <Label htmlFor="callDuration" className="text-sm font-medium">
-                Quanto tempo dura cada chamada? (minutos)
+                Duração da Chamada (min)
               </Label>
               <Select value={callDuration} onValueChange={setCallDuration}>
                 <SelectTrigger id="callDuration">
@@ -124,7 +124,7 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
             {/* Cut duration */}
             <div className="space-y-2">
               <Label htmlFor="cutDuration" className="text-sm font-medium">
-                Quanto tempo demora um corte completo? (minutos)
+                Tempo de Corte (min)
               </Label>
               <Input
                 id="cutDuration"
@@ -142,7 +142,7 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
             {/* Average ticket */}
             <div className="space-y-2">
               <Label htmlFor="averageTicket" className="text-sm font-medium">
-                Quanto cada cliente paga em média? (€)
+                Valor Médio do Corte (€)
               </Label>
               <Input
                 id="averageTicket"
@@ -163,7 +163,7 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
                 htmlFor="missedCallsPercent"
                 className="text-sm font-medium"
               >
-                Quantas chamadas ficam por atender quando estão ocupados? (%)
+                Chamadas Perdidas (%)
               </Label>
               <Select
                 value={missedCallsPercent}
@@ -185,7 +185,7 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
 
           <Button type="submit" variant="cta" size="xl" className="w-full">
             <Calculator className="h-5 w-5" />
-            CALCULAR ROI
+            VER LUCRO PERDIDO
           </Button>
         </form>
       </CardContent>

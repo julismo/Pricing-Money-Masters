@@ -4,7 +4,7 @@ import { CalculatorForm, FormData } from '@/components/CalculatorForm';
 import { ResultsCards, CalculationResults } from '@/components/ResultsCards';
 import { ComparisonChart } from '@/components/ComparisonChart';
 import { DetailedBreakdown } from '@/components/DetailedBreakdown';
-import { CTASection } from '@/components/CTASection';
+
 
 // Fixed variables
 const WEEKS_PER_MONTH = 4.3;
@@ -106,7 +106,7 @@ const Index = () => {
               <div className="flex justify-center">
                 <DetailedBreakdown results={results} />
               </div>
-              <CTASection />
+
             </section>
           )}
         </div>

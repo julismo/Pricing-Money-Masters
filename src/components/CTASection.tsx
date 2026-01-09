@@ -9,7 +9,7 @@ export function CTASection() {
           Números não mentem.
         </h2>
         <p className="mb-8 text-lg text-primary-foreground/90">
-          Estás pronto para recuperar este dinheiro?
+          Recupere esse valor agora.
         </p>
 
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -17,10 +17,10 @@ export function CTASection() {
             variant="accent"
             size="xl"
             className="w-full sm:w-auto"
-            onClick={() => window.open('#contacto', '_self')}
+            onClick={() => console.log('CTA Clicked')} // TODO: Add real link
           >
             <MessageCircle className="h-5 w-5" />
-            Quero Automatizar Minha Barbearia
+            Automatizar Agora
             <ArrowRight className="h-5 w-5" />
           </Button>
         </div>

@@ -35,20 +35,20 @@ export function DetailedBreakdown({ results }: DetailedBreakdownProps) {
 
   const rows = [
     { label: 'Chamadas/mês', value: formatNumber(results.callsPerMonth) },
-    { label: 'Minutos totais em chamadas', value: `${formatNumber(results.minutesInCalls)} min` },
-    { label: 'Tempo perdido (com interrupções)', value: `${formatNumber(results.realTimeLost)} min (${formatNumber(results.hoursLost, 1)} horas)` },
-    { label: 'Cortes equivalentes perdidos', value: formatNumber(results.cutsLost, 1) },
-    { label: 'Receita perdida (tempo)', value: `${formatCurrency(results.revenueLostTime)}/mês` },
-    { label: 'Receita perdida (chamadas não atendidas)', value: `${formatCurrency(results.revenueLostCalls)}/mês` },
-    { label: 'Total perdido/mês', value: formatCurrency(results.totalBenefitMonthly) },
-    { label: 'Total perdido/ano', value: formatCurrency(results.totalBenefitYearly) },
+    { label: 'Tempo em Chamadas', value: `${formatNumber(results.minutesInCalls)} min` },
+    { label: 'Tempo Perdido Total', value: `${formatNumber(results.realTimeLost)} min (${formatNumber(results.hoursLost, 1)}h)` },
+    { label: 'Cortes Perdidos', value: formatNumber(results.cutsLost, 1) },
+    { label: 'Perda por Tempo', value: `${formatCurrency(results.revenueLostTime)}/mês` },
+    { label: 'Perda por Chamadas', value: `${formatCurrency(results.revenueLostCalls)}/mês` },
+    { label: 'Perda Mensal', value: formatCurrency(results.totalBenefitMonthly) },
+    { label: 'Perda Anual', value: formatCurrency(results.totalBenefitYearly) },
     { type: 'separator' },
-    { label: 'Custo consumo (minutos × 0.12€)', value: `${formatCurrency(results.variableCost)}/mês` },
-    { label: 'Custo infraestrutura fixa', value: '22,00€/mês' },
-    { label: 'Custo total sistema/mês', value: formatCurrency(results.totalCostMonthly) },
-    { label: 'Custo total sistema/ano', value: formatCurrency(results.totalCostYearly) },
+    { label: 'Custo de Voz', value: `${formatCurrency(results.variableCost)}/mês` },
+    { label: 'Mensalidade Sistema', value: '22,00€/mês' },
+    { label: 'Custo Mensal', value: formatCurrency(results.totalCostMonthly) },
+    { label: 'Custo Anual', value: formatCurrency(results.totalCostYearly) },
     { type: 'separator' },
-    { label: 'LUCRO LÍQUIDO ANUAL', value: formatCurrency(results.netProfitYearly), highlight: true },
+    { label: 'LUCRO LÍQUIDO', value: formatCurrency(results.netProfitYearly), highlight: true },
   ];
 
   return (
