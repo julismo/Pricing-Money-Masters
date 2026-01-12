@@ -44,11 +44,14 @@ export function DetailedBreakdown({ results }: DetailedBreakdownProps) {
     { label: 'Perda Anual', value: formatCurrency(results.totalBenefitYearly) },
     { type: 'separator' },
     { label: 'Custo de Voz', value: `${formatCurrency(results.variableCost)}/mês` },
-    { label: 'Mensalidade Sistema', value: '22,00€/mês' },
+    { label: 'Infraestrutura', value: '22,00€/mês' },
     { label: 'Custo Mensal', value: formatCurrency(results.totalCostMonthly) },
     { label: 'Custo Anual', value: formatCurrency(results.totalCostYearly) },
     { type: 'separator' },
     { label: 'LUCRO LÍQUIDO', value: formatCurrency(results.netProfitYearly), highlight: true },
+    { type: 'separator' },
+    { label: 'Valor da TUA Hora', value: formatCurrency(results.impliedHourlyRate, 0) + '/h', highlight: false },
+    { label: 'Margem de Segurança', value: formatNumber(results.aiSafetyMargin, 0) + '%', highlight: false },
   ];
 
   return (

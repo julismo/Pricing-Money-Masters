@@ -11,17 +11,20 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
     {
       name: 'Perde sem sistema',
       value: Math.round(results.totalBenefitYearly),
+      displayValue: Math.max(10, Math.round(results.totalBenefitYearly)), // Ensure at least small bar
       color: 'hsl(0 84% 60%)',
     },
     {
       name: 'Custo do sistema',
       value: Math.round(results.totalCostYearly),
+      displayValue: Math.max(10, Math.round(results.totalCostYearly)),
       color: 'hsl(224 76% 33%)',
     },
     {
       name: 'Lucro líquido',
       value: Math.round(results.netProfitYearly),
-      color: 'hsl(160 84% 39%)',
+      displayValue: Math.max(10, Math.abs(Math.round(results.netProfitYearly))), // Show magnitude of loss (Red bar) instead of shrinking it
+      color: results.netProfitYearly >= 0 ? 'hsl(160 84% 39%)' : 'hsl(0 84% 60%)', // Green or Red
     },
   ];
 
@@ -44,7 +47,7 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
               layout="vertical"
               margin={{ top: 10, right: 60, left: 10, bottom: 10 }}
             >
-              <XAxis type="number" hide />
+              <XAxis type="number" hide domain={[0, 'dataMax']} />
               <YAxis
                 type="category"
                 dataKey="name"
@@ -54,9 +57,10 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
                 width={120}
               />
               <Bar
-                dataKey="value"
+                dataKey="displayValue"
                 radius={[0, 6, 6, 0]}
                 barSize={32}
+                minPointSize={2}
               >
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />

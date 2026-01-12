@@ -1,8 +1,10 @@
-import { Phone, Clock, Scissors, TrendingDown, TrendingUp, CheckCircle2, Rocket, DollarSign } from 'lucide-react';
+import { Phone, Clock, Scissors, TrendingDown, TrendingUp, CheckCircle2, Rocket, DollarSign, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnimatedNumber } from './AnimatedNumber';
 
 export interface CalculationResults {
+  isSeasonal?: boolean; // NEW: For conditional display
+  startMonthSeasonalityFactor?: number; // NEW: For dynamic Card HOJE
   callsPerMonth: number;
   minutesInCalls: number;
   realTimeLost: number;
@@ -20,6 +22,9 @@ export interface CalculationResults {
   netProfitYearly: number;
   roiPercent: number;
   paybackMonths: number;
+  impliedHourlyRate: number;
+  aiSafetyMargin: number;
+  lowVolumeWarning?: boolean; // NEW: True if callsPerMonth < 40
 }
 
 interface ResultsCardsProps {
@@ -29,6 +34,22 @@ interface ResultsCardsProps {
 export function ResultsCards({ results }: ResultsCardsProps) {
   return (
     <div className="animate-fade-in-up space-y-6">
+      {/* Low Volume Warning Banner */}
+      {results.lowVolumeWarning && (
+        <div className="flex items-start gap-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
+          <Info className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-medium text-amber-800">
+              Volume baixo detectado
+            </p>
+            <p className="text-sm text-amber-700 mt-1">
+              Com menos de 10 chamadas/semana, a margem de lucro é reduzida.
+              <span className="font-medium"> Recomendamos 15+ chamadas/semana</span> para maximizar o retorno.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Current Situation Card */}
       <Card className="card-shadow-lg border-l-4 border-l-loss">
         <CardHeader className="pb-3">
@@ -81,9 +102,23 @@ export function ResultsCards({ results }: ResultsCardsProps) {
               </div>
               <div>
                 <p className="text-2xl font-bold text-loss">
-                  ~<AnimatedNumber value={Math.round(results.totalBenefitMonthly)} prefix="" suffix="€" />/mês
+                  {/* NEW: Apply startMonthSeasonalityFactor for dynamic Card HOJE */}
+                  ~<AnimatedNumber
+                    value={Math.round(
+                      results.totalBenefitMonthly * (results.startMonthSeasonalityFactor || 1.0)
+                    )}
+                    prefix=""
+                    suffix="€"
+                  />/mês
                 </p>
-                <p className="text-sm text-muted-foreground">em perdas</p>
+                <p className="text-sm text-muted-foreground">
+                  oportunidade perdida
+                  {results.isSeasonal && results.startMonthSeasonalityFactor && results.startMonthSeasonalityFactor !== 1.0 && (
+                    <span className="ml-1 text-xs opacity-70">
+                      (mês inicial)
+                    </span>
+                  )}
+                </p>
               </div>
             </div>
 
@@ -95,7 +130,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold text-loss">
                   ~<AnimatedNumber value={Math.round(results.totalBenefitYearly)} suffix="€" />/ano
                 </p>
-                <p className="text-sm text-muted-foreground">desperdiçados</p>
+                <p className="text-sm text-muted-foreground">que podes recuperar</p>
               </div>
             </div>
           </div>

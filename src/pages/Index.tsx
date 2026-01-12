@@ -1,122 +1,145 @@
 import { useState } from 'react';
-import { Header } from '@/components/Header';
-import { CalculatorForm, FormData } from '@/components/CalculatorForm';
-import { ResultsCards, CalculationResults } from '@/components/ResultsCards';
-import { ComparisonChart } from '@/components/ComparisonChart';
-import { DetailedBreakdown } from '@/components/DetailedBreakdown';
-
-
-// Fixed variables
-const WEEKS_PER_MONTH = 4.3;
-const CONTEXT_SWITCH_MINUTES = 1;
-const MISSED_CALL_CONVERSION_RATE = 0.20;
-const COST_PER_MINUTE = 0.12;
-const FIXED_MONTHLY_COST = 22;
-
-function calculateROI(data: FormData): CalculationResults {
-  // Calls per month
-  const callsPerMonth = Math.round(data.callsPerWeek * WEEKS_PER_MONTH);
-
-  // Minutes in calls
-  const minutesInCalls = callsPerMonth * data.callDuration;
-
-  // Real time lost (with context switching)
-  const realTimeLost = callsPerMonth * (data.callDuration + CONTEXT_SWITCH_MINUTES);
-
-  // Hours lost
-  const hoursLost = realTimeLost / 60;
-
-  // Cuts lost due to time
-  const cutsLost = realTimeLost / data.cutDuration;
-
-  // Revenue lost due to time
-  const revenueLostTime = cutsLost * data.averageTicket;
-
-  // Missed calls calculations
-  const missedCalls = callsPerMonth * (data.missedCallsPercent / 100);
-  const clientsLost = missedCalls * MISSED_CALL_CONVERSION_RATE;
-  const revenueLostCalls = clientsLost * data.averageTicket;
-
-  // Total benefits
-  const totalBenefitMonthly = revenueLostTime + revenueLostCalls;
-  const totalBenefitYearly = totalBenefitMonthly * 12;
-
-  // Costs
-  const variableCost = minutesInCalls * COST_PER_MINUTE;
-  const totalCostMonthly = FIXED_MONTHLY_COST + variableCost;
-  const totalCostYearly = totalCostMonthly * 12;
-
-  // Net profit and ROI
-  const netProfitYearly = totalBenefitYearly - totalCostYearly;
-  const roiPercent = ((totalBenefitYearly - totalCostYearly) / totalCostYearly) * 100;
-
-  // Payback period
-  const paybackMonths = Math.ceil(totalCostYearly / totalBenefitMonthly);
-
-  return {
-    callsPerMonth,
-    minutesInCalls,
-    realTimeLost,
-    hoursLost,
-    cutsLost,
-    revenueLostTime,
-    missedCalls,
-    clientsLost,
-    revenueLostCalls,
-    totalBenefitMonthly,
-    totalBenefitYearly,
-    variableCost,
-    totalCostMonthly,
-    totalCostYearly,
-    netProfitYearly,
-    roiPercent,
-    paybackMonths,
-  };
-}
+import { Stepper } from '@/components/wizard/Stepper';
+import { StepValueType } from '@/components/wizard/StepValueType';
+import { StepNiche } from '@/components/wizard/StepNiche';
+import { StepSolutions } from '@/components/wizard/StepSolutions';
+import { StepCalculator } from '@/components/wizard/StepCalculator';
+import { StepResults } from '@/components/wizard/StepResults';
+import { UnifiedFormData, calculateUnifiedROI, CalculationResults } from '@/utils/roiCalculations';
+import { Card } from '@/components/ui/card';
+import { LoadingAnalysis } from '@/components/LoadingAnalysis';
 
 const Index = () => {
-  const [results, setResults] = useState<CalculationResults | null>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  // Store both scenarios
+  const [roiResults, setRoiResults] = useState<{
+    realistic: CalculationResults;
+    optimistic: CalculationResults;
+  } | null>(null);
 
-  const handleCalculate = (data: FormData) => {
-    const calculatedResults = calculateROI(data);
-    setResults(calculatedResults);
+  const [automationType, setAutomationType] = useState<string>('voice');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisDuration, setAnalysisDuration] = useState(2000);
 
-    // Scroll to results
+  const nextStep = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, 5));
+    window.scrollTo(0, 0);
+  };
+
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    window.scrollTo(0, 0);
+  };
+
+  const handleValueTypeSelect = (type: 'time' | 'money') => {
+    console.log('Selected type:', type);
+    nextStep();
+  };
+
+  const handleNicheSelect = (niche: string) => {
+    console.log('Selected niche:', niche);
+    nextStep();
+  };
+
+  const handleSolutionSelect = (type: string) => {
+    setAutomationType(type);
+    nextStep();
+  };
+
+  const handleCalculate = (data: UnifiedFormData) => {
+    // 1. Calculate Duration dynamically
+    const baseDuration = 3000;
+    const seasonalityPenalty = data.useSeasonality ? 2500 : 0; // Seasonality adds 2.5s
+    const volumePenalty = Math.min(data.callsPerWeek * 15, 3000); // Scale with volume, max 3s
+    const randomVar = Math.floor(Math.random() * 500); // 0-500ms random
+
+    const totalDuration = baseDuration + seasonalityPenalty + volumePenalty + randomVar;
+    setAnalysisDuration(totalDuration);
+    setIsAnalyzing(true);
+
+    // 2. Perform Calculations
+    const realistic = calculateUnifiedROI({ ...data, calculationMode: 'tempo' });
+    const optimistic = calculateUnifiedROI({ ...data, calculationMode: 'oportunidade' });
+
+    // 3. Wait and Show
     setTimeout(() => {
-      document.getElementById('results')?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+      setRoiResults({ realistic, optimistic });
+      setIsAnalyzing(false);
+      nextStep();
+    }, totalDuration);
+  };
+
+  const handleRecalculate = () => {
+    setCurrentStep(4);
+    window.scrollTo(0, 0);
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-between">
+      {/* Main Content Container */}
+      <div className="max-w-4xl mx-auto w-full space-y-8">
 
-      <main className="container py-12">
-        <div className="mx-auto max-w-4xl space-y-12">
-          {/* Calculator Form */}
-          <section>
-            <CalculatorForm onCalculate={handleCalculate} />
-          </section>
+        {/* Formal Header: Logo & Title */}
+        <div className="text-center space-y-4">
+          <div className="flex justify-center">
+            <div className="h-16 w-16">
+              <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-slate-900 tracking-tight sm:text-4xl">
+            Simulador de Impacto Financeiro
+          </h1>
+          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+            Analise a eficiência operacional do seu negócio e projete o retorno do investimento em automação.
+          </p>
+        </div>
 
-          {/* Results Section */}
-          {results && (
-            <section id="results" className="space-y-8">
-              <ResultsCards results={results} />
-              <ComparisonChart results={results} />
-              <div className="flex justify-center">
-                <DetailedBreakdown results={results} />
+        {/* The "Form" Card or Loading Screen */}
+        <Card className="bg-white shadow-xl border-slate-200 p-6 sm:p-10 rounded-2xl min-h-[600px] flex flex-col justify-center">
+          {isAnalyzing ? (
+            <LoadingAnalysis duration={analysisDuration} />
+          ) : (
+            <>
+              <div className="mb-10">
+                <Stepper currentStep={currentStep} />
               </div>
 
-            </section>
+              <div className="mt-8">
+                {currentStep === 1 && (
+                  <StepValueType onNext={handleValueTypeSelect} />
+                )}
+
+                {currentStep === 2 && (
+                  <StepNiche onNext={handleNicheSelect} onBack={prevStep} />
+                )}
+
+                {currentStep === 3 && (
+                  <StepSolutions onNext={handleSolutionSelect} onBack={prevStep} />
+                )}
+
+                {currentStep === 4 && (
+                  <StepCalculator
+                    onCalculate={handleCalculate}
+                    onBack={prevStep}
+                  />
+                )}
+
+                {currentStep === 5 && roiResults && (
+                  <StepResults
+                    realistic={roiResults.realistic}
+                    optimistic={roiResults.optimistic}
+                    onRecalculate={handleRecalculate}
+                  />
+                )}
+              </div>
+            </>
           )}
-        </div>
-      </main>
+        </Card>
+      </div>
 
       {/* Footer */}
-      <footer className="border-t bg-card py-8">
-        <div className="container text-center text-sm text-muted-foreground">
-          <p>Calculadora de ROI para Sistema Automático de Barbearias</p>
-        </div>
+      <footer className="mt-12 text-center text-sm text-slate-400">
+        <p>Sim, a Barber ROI é feita em 2026.</p>
       </footer>
     </div>
   );
