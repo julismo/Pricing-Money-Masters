@@ -1,10 +1,12 @@
 import { Phone, Clock, Scissors, TrendingDown, TrendingUp, CheckCircle2, Rocket, DollarSign, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnimatedNumber } from './AnimatedNumber';
+import { PricingSection } from './PricingSection';
 
 export interface CalculationResults {
-  isSeasonal?: boolean; // NEW: For conditional display
-  startMonthSeasonalityFactor?: number; // NEW: For dynamic Card HOJE
+  mode: 'tempo' | 'oportunidade';
+  isSeasonal?: boolean;
+  startMonthSeasonalityFactor?: number;
   callsPerMonth: number;
   minutesInCalls: number;
   realTimeLost: number;
@@ -24,7 +26,8 @@ export interface CalculationResults {
   paybackMonths: number;
   impliedHourlyRate: number;
   aiSafetyMargin: number;
-  lowVolumeWarning?: boolean; // NEW: True if callsPerMonth < 40
+  lowVolumeWarning?: boolean;
+  recommendedSetup: number;
 }
 
 interface ResultsCardsProps {
@@ -43,7 +46,8 @@ export function ResultsCards({ results }: ResultsCardsProps) {
               Volume baixo detectado
             </p>
             <p className="text-sm text-amber-700 mt-1">
-              Com menos de 10 chamadas/semana, a margem de lucro é reduzida.
+              Com {results.callsPerMonth} chamadas/mês e ~{Math.round(results.missedCalls)} perdidas,
+              a margem de lucro é reduzida.
               <span className="font-medium"> Recomendamos 15+ chamadas/semana</span> para maximizar o retorno.
             </p>
           </div>
@@ -59,7 +63,8 @@ export function ResultsCards({ results }: ResultsCardsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Row 1: Volume metrics */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-loss/10">
                 <Phone className="h-5 w-5 text-loss" />
@@ -73,6 +78,18 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-loss/20">
+                <Phone className="h-5 w-5 text-loss" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-loss">
+                  ~<AnimatedNumber value={Math.round(results.missedCalls)} />
+                </p>
+                <p className="text-sm text-muted-foreground">perdidas/mês</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-loss/10">
                 <Clock className="h-5 w-5 text-loss" />
               </div>
@@ -80,10 +97,13 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold">
                   <AnimatedNumber value={results.hoursLost} decimals={1} suffix="h" />
                 </p>
-                <p className="text-sm text-muted-foreground">horas perdidas/mês</p>
+                <p className="text-sm text-muted-foreground">horas perdidas</p>
               </div>
             </div>
+          </div>
 
+          {/* Row 2: Financial metrics */}
+          <div className="grid grid-cols-3 gap-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-loss/10">
                 <Scissors className="h-5 w-5 text-loss" />
@@ -92,37 +112,30 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold">
                   <AnimatedNumber value={results.cutsLost} decimals={1} />
                 </p>
-                <p className="text-sm text-muted-foreground">cortes não realizados</p>
+                <p className="text-sm text-muted-foreground">cortes perdidos</p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-loss/10">
                 <DollarSign className="h-5 w-5 text-loss" />
               </div>
               <div>
                 <p className="text-2xl font-bold text-loss">
-                  {/* NEW: Apply startMonthSeasonalityFactor for dynamic Card HOJE */}
                   ~<AnimatedNumber
                     value={Math.round(
                       results.totalBenefitMonthly * (results.startMonthSeasonalityFactor || 1.0)
                     )}
-                    prefix=""
                     suffix="€"
                   />/mês
                 </p>
                 <p className="text-sm text-muted-foreground">
                   oportunidade perdida
-                  {results.isSeasonal && results.startMonthSeasonalityFactor && results.startMonthSeasonalityFactor !== 1.0 && (
-                    <span className="ml-1 text-xs opacity-70">
-                      (mês inicial)
-                    </span>
-                  )}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 sm:col-span-2">
+            <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-loss/10">
                 <TrendingDown className="h-5 w-5 text-loss" />
               </div>

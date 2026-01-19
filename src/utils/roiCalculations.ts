@@ -45,6 +45,7 @@ export interface CalculationResults {
     impliedHourlyRate: number; // Added for UI
     aiSafetyMargin: number; // Added for UI
     lowVolumeWarning: boolean; // NEW: True if callsPerMonth < 40
+    recommendedSetup: number; // NEW: 20% of totalBenefitYearly (fair price suggestion)
 
     // Metadata
     assumptions: {
@@ -261,6 +262,7 @@ export function calculateUnifiedROI(
         impliedHourlyRate: (data.averageTicket / data.cutDuration) * 60,
         aiSafetyMargin: (1 - assumptions.aiEfficiency) * 100,
         lowVolumeWarning: callsPerMonth < 40, // NEW: Warn if less than ~10 calls/week
+        recommendedSetup: Math.round(yearlyRevenue * 0.20), // NEW: 20% of yearly value = fair price
 
         // Metadata
         assumptions: {

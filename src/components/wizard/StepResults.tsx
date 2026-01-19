@@ -4,6 +4,7 @@ import { ComparisonChart } from '@/components/ComparisonChart';
 import { CashflowChart } from '@/components/CashflowChart';
 import { SeasonalityChart } from '@/components/SeasonalityChart';
 import { DetailedBreakdown } from '@/components/DetailedBreakdown';
+import { PricingSection } from '@/components/PricingSection';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw, TrendingUp, Anchor, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -26,8 +27,20 @@ export function StepResults({ realistic, optimistic, onRecalculate }: StepResult
     const [chartTab, setChartTab] = useState<'annual' | 'monthly' | 'sazonal'>('annual');
     const [showWarning, setShowWarning] = useState(false);
 
+    // Pricing state (for CashflowChart reactivity)
+    const [customSetup, setCustomSetup] = useState<number | undefined>(undefined);
+    const [customMaintenance, setCustomMaintenance] = useState<number | undefined>(undefined);
+    const [contractMonths, setContractMonths] = useState<number>(12);
+
     // Choose which results to display
     const activeResults = viewMode === 'realistic' ? realistic : optimistic;
+
+    // Handle pricing changes from PricingSection
+    const handlePricingChange = (setup: number, maintenance: number, months: number) => {
+        setCustomSetup(setup);
+        setCustomMaintenance(maintenance);
+        setContractMonths(months);
+    };
 
     const handleSeasonalityClick = () => {
         if (!activeResults.isSeasonal) {
@@ -124,7 +137,11 @@ export function StepResults({ realistic, optimistic, onRecalculate }: StepResult
                         <ComparisonChart results={activeResults} />
                     )}
                     {chartTab === 'monthly' && (
-                        <CashflowChart results={activeResults} />
+                        <CashflowChart
+                            results={activeResults}
+                            customSetup={customSetup}
+                            customMaintenance={customMaintenance}
+                        />
                     )}
                     {(chartTab === 'sazonal' && activeResults.isSeasonal) && (
                         <SeasonalityChart results={activeResults} />
@@ -137,6 +154,12 @@ export function StepResults({ realistic, optimistic, onRecalculate }: StepResult
                     )}
                 </div>
             </div>
+
+            {/* Pricing Section - Below charts, only for Realista */}
+            <PricingSection
+                results={activeResults}
+                onPricingChange={handlePricingChange}
+            />
 
             <div className="flex justify-center">
                 <DetailedBreakdown results={activeResults} />
