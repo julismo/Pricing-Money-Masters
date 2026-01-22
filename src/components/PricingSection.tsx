@@ -1,19 +1,46 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { DollarSign, Clock, ChevronDown, ChevronUp, Calendar } from 'lucide-react';
+import { DollarSign, Clock, ChevronDown, ChevronUp, Calendar, User, Bot, TrendingDown } from 'lucide-react';
 import { CalculationResults } from '@/utils/roiCalculations';
 
 interface PricingSectionProps {
     results: CalculationResults;
+    realisticResults?: CalculationResults;
+    optimisticResults?: CalculationResults;
     onPricingChange?: (setup: number, maintenance: number, contractMonths: number) => void;
 }
 
-export function PricingSection({ results, onPricingChange }: PricingSectionProps) {
-    // Default values
-    const [customSetup, setCustomSetup] = useState<number>(results.recommendedSetup);
-    const [customMaintenance, setCustomMaintenance] = useState<number>(0); // Consultant fee (separate from infra)
-    const [contractMonths, setContractMonths] = useState<number>(12); // Default 12 month contract
+export function PricingSection({ results, realisticResults, optimisticResults, onPricingChange }: PricingSectionProps) {
+    // Calculate average-based Setup (fair price = 25% of average yearly benefit)
+    const averageBasedSetup = useMemo(() => {
+        if (realisticResults && optimisticResults) {
+            const avgYearly = (realisticResults.totalBenefitYearly + optimisticResults.totalBenefitYearly) / 2;
+            return Math.round(avgYearly * 0.25);
+        }
+        return results.recommendedSetup; // Fallback to active mode
+    }, [realisticResults, optimisticResults, results.recommendedSetup]);
+
+    const averageYearlyBenefit = useMemo(() => {
+        if (realisticResults && optimisticResults) {
+            return Math.round((realisticResults.totalBenefitYearly + optimisticResults.totalBenefitYearly) / 2);
+        }
+        return results.totalBenefitYearly;
+    }, [realisticResults, optimisticResults, results.totalBenefitYearly]);
+
+    // Calculate average-based Maintenance (same logic: 25% of average monthly benefit)
+    const averageBasedMaintenance = useMemo(() => {
+        if (realisticResults && optimisticResults) {
+            const avgMonthly = (realisticResults.totalBenefitMonthly + optimisticResults.totalBenefitMonthly) / 2;
+            return Math.round(avgMonthly * 0.25);
+        }
+        return Math.round(results.totalBenefitMonthly * 0.25);
+    }, [realisticResults, optimisticResults, results.totalBenefitMonthly]);
+
+    // Default values - Setup and Maintenance use average-based calculation
+    const [customSetup, setCustomSetup] = useState<number>(averageBasedSetup);
+    const [customMaintenance, setCustomMaintenance] = useState<number>(averageBasedMaintenance); // 25% of monthly benefit
+    const [contractMonths, setContractMonths] = useState<number>(4); // Default 4 month contract
     const [showConfig, setShowConfig] = useState(false);
 
     // Calculate payback with custom values
@@ -37,17 +64,32 @@ export function PricingSection({ results, onPricingChange }: PricingSectionProps
     }, [customSetup, customMaintenance, results.totalBenefitMonthly, results.totalCostMonthly, contractMonths]);
 
     // Total investment for the contract period
+    // NOTE: Month 1 = Setup only, Maintenance starts from Month 2
+    const maintenanceMonths = Math.max(0, contractMonths - 1);
     const totalInvestment = useMemo(() => {
-        return customSetup + (customMaintenance * contractMonths);
-    }, [customSetup, customMaintenance, contractMonths]);
+        return customSetup + (customMaintenance * maintenanceMonths);
+    }, [customSetup, customMaintenance, maintenanceMonths]);
+
+    // Monthly equivalent cost for comparison (Setup amortized + Maintenance pro-rated)
+    // Formula: (Setup + Maintenance*(Months-1)) / Months
+    const monthlyEquivalent = useMemo(() => {
+        if (contractMonths <= 0) return customSetup;
+        const total = customSetup + (customMaintenance * maintenanceMonths);
+        return Math.round(total / contractMonths);
+    }, [customSetup, customMaintenance, contractMonths, maintenanceMonths]);
+
+    // Savings compared to receptionist (avg €1.000/month - realistic range covering recibos verdes to legal)
+    const receptionistAvg = 1000; // Middle of €800-1.200 range
+    const monthlySavings = Math.max(0, receptionistAvg - monthlyEquivalent);
+    const annualSavings = monthlySavings * 12;
 
     // Notify parent of changes
     useEffect(() => {
         onPricingChange?.(customSetup, customMaintenance, contractMonths);
     }, [customSetup, customMaintenance, contractMonths, onPricingChange]);
 
-    // Only show in Realista mode
-    if (results.mode !== 'tempo') return null;
+    // Show in both modes (Realista and Otimista)
+    // Config inputs are hidden in Otimista mode
 
     return (
         <Card className="card-shadow-lg mt-4 border-0">
@@ -108,21 +150,100 @@ export function PricingSection({ results, onPricingChange }: PricingSectionProps
                                     Investimento total: {totalInvestment}€ em {contractMonths} meses
                                 </p>
                             )}
+
                         </div>
                     )}
                 </div>
 
-                {/* Consultant Config Toggle */}
-                <button
-                    onClick={() => setShowConfig(!showConfig)}
-                    className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-                >
-                    {showConfig ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    {showConfig ? 'Fechar configuração' : 'Ajustar valores'}
-                </button>
+                {/* Quality Upgrade Card - Value Proposition (Real Market Data) */}
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-200">
+                    <div className="flex items-center gap-2 mb-4">
+                        <TrendingDown className="h-4 w-4 text-emerald-600" />
+                        <h4 className="text-sm font-semibold text-emerald-800">O Que Ganhas (Mesmo Preço, 10x Melhor)</h4>
+                    </div>
 
-                {/* Consultant Config Panel */}
-                {showConfig && (
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Receptionist Comparison (Mixed Reality) */}
+                        <div className="bg-white/60 rounded-lg p-4 border border-slate-200">
+                            <div className="flex items-center gap-2 mb-2">
+                                <User className="h-4 w-4 text-slate-500" />
+                                <span className="text-xs font-medium text-slate-600">Recepcionista</span>
+                            </div>
+                            <p className="text-lg font-bold text-slate-700">€800-1.200<span className="text-sm font-normal text-slate-400">/mês</span></p>
+                            <p className="text-xs text-slate-400 mt-1">(Base + TSU + subsídios)</p>
+                            <ul className="text-xs text-slate-400 mt-2 space-y-1">
+                                <li>❌ Só horário comercial</li>
+                                <li>❌ Faltas e férias</li>
+                                <li>❌ Erros de agendamento</li>
+                                <li>❌ (Se tiver uma)</li>
+                            </ul>
+                        </div>
+
+                        {/* AI Voice Agent */}
+                        <div className="bg-white/60 rounded-lg p-4 border border-emerald-300">
+                            <div className="flex items-center gap-2 mb-2">
+                                <Bot className="h-4 w-4 text-emerald-600" />
+                                <span className="text-xs font-medium text-emerald-700">Nossa Solução IA</span>
+                            </div>
+                            <p className="text-lg font-bold text-emerald-600">{monthlyEquivalent}€<span className="text-sm font-normal text-slate-400">/mês</span></p>
+                            <p className="text-xs text-slate-400 mt-1">
+                                ({customSetup}€{customMaintenance > 0 && maintenanceMonths > 0 ? ` + ${customMaintenance}€×${maintenanceMonths}` : ''}) ÷ {contractMonths}
+                            </p>
+                            <ul className="text-xs text-emerald-600 mt-2 space-y-1">
+                                <li>✅ 24h/7 dias/365 dias</li>
+                                <li>✅ Nunca falha</li>
+                                <li>✅ Zero erros</li>
+                                <li>✅ Imagem profissional</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    {/* Value Highlight */}
+                    <div className="mt-4 pt-3 border-t border-emerald-200 text-center">
+                        {monthlySavings > 0 ? (
+                            <>
+                                <p className="text-sm text-emerald-800 font-medium">
+                                    Poupas <span className="text-emerald-600 font-bold">{monthlySavings}€/mês</span> vs recepcionista
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Economia anual: <span className="font-semibold">{annualSavings.toLocaleString('pt-PT')}€</span> + benefícios 24/7
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-sm text-emerald-800 font-medium">
+                                    Mesmo preço. <span className="text-emerald-600">10x mais benefícios.</span>
+                                </p>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Captura chamadas à noite • Agenda automática • Nunca perde cliente
+                                </p>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Sovereignty Seal - Trust Badge */}
+                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 flex items-center gap-3">
+                    <div className="text-2xl">🏛️</div>
+                    <div>
+                        <p className="text-sm font-medium text-slate-700">A Infraestrutura é Tua</p>
+                        <p className="text-xs text-slate-500">Sistema instalado no TEU servidor. Sem dependência, sem lock-in.</p>
+                    </div>
+                </div>
+
+                {/* Consultant Config Toggle - Only in Realista mode */}
+                {results.mode === 'tempo' && (
+                    <button
+                        onClick={() => setShowConfig(!showConfig)}
+                        className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+                    >
+                        {showConfig ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        {showConfig ? 'Fechar configuração' : 'Ajustar valores'}
+                    </button>
+                )}
+
+                {/* Consultant Config Panel - Only in Realista mode */}
+                {results.mode === 'tempo' && showConfig && (
                     <div className="bg-slate-100 rounded-lg p-4 border border-slate-200">
                         <p className="text-xs text-slate-500 mb-3 flex items-center gap-1">
                             <Calendar className="h-3 w-3" />

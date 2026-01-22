@@ -158,6 +158,8 @@ export function StepResults({ realistic, optimistic, onRecalculate }: StepResult
             {/* Pricing Section - Below charts, only for Realista */}
             <PricingSection
                 results={activeResults}
+                realisticResults={realistic}
+                optimisticResults={optimistic}
                 onPricingChange={handlePricingChange}
             />
 

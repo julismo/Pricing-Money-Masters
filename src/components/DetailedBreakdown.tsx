@@ -40,7 +40,7 @@ export function DetailedBreakdown({ results }: DetailedBreakdownProps) {
     { label: 'Tempo Perdido Total', value: `${formatNumber(results.realTimeLost)} min (${formatNumber(results.hoursLost, 1)}h)` },
     { label: 'Cortes Perdidos', value: formatNumber(results.cutsLost, 1) },
     { label: 'Perda por Tempo', value: `${formatCurrency(results.revenueLostTime)}/mês` },
-    { label: 'Perda por Chamadas', value: `${formatCurrency(results.revenueLostCalls)}/mês` },
+    // { label: 'Perda por Chamadas', value: `${formatCurrency(results.revenueLostCalls)}/mês` }, // Removed per user request
     { label: 'Perda Mensal (média)', value: formatCurrency(results.totalBenefitMonthly) },
     { label: 'Perda Anual', value: formatCurrency(results.totalBenefitYearly) },
     { type: 'separator' },

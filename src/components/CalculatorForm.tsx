@@ -255,8 +255,6 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
                   <SelectItem value="1">1 minuto</SelectItem>
                   <SelectItem value="2">2 minutos</SelectItem>
                   <SelectItem value="3">3 minutos</SelectItem>
-                  <SelectItem value="4">4 minutos</SelectItem>
-                  <SelectItem value="5">5 minutos</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -289,11 +287,11 @@ export function CalculatorForm({ onCalculate }: CalculatorFormProps) {
                   <SelectValue placeholder="Selecionar" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="0">0% (Nenhuma)</SelectItem>
                   <SelectItem value="10">10% (Baixo)</SelectItem>
                   <SelectItem value="20">20% (Média)</SelectItem>
                   <SelectItem value="30">30% (Alto)</SelectItem>
                   <SelectItem value="40">40% (Crítico)</SelectItem>
-                  <SelectItem value="50">50% (Caos)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

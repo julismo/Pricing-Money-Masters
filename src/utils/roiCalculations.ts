@@ -127,36 +127,29 @@ export function calculateUnifiedROI(
     const cutsFromTime = convertibleMinutes / data.cutDuration;
     const revenueFromTime = cutsFromTime * data.averageTicket;
 
-    // 5. VETOR 2: Oportunidade (Chamadas Perdidas)
+    // 5. VETOR 2: Oportunidade (Chamadas Perdidas) - REMOVIDO POR SER ESPECULATIVO
+    // Mantemos as variaveis zeradas para compatibilidade de UI se necessário, mas não somamos à receita
     const aiRecovered = callsMissed * assumptions.aiEfficiency;
-    const newClients = aiRecovered * assumptions.conversionRate;
-    const revenueFromOpportunity = newClients * data.averageTicket;
+    // const newClients = aiRecovered * assumptions.conversionRate; // REMOVIDO
+    const newClients = 0; // Forçamos 0 pois não é quantificável
+    const revenueFromOpportunity = 0; // Forçamos 0 pois não é quantificável
 
     // 6. Limitação de Capacidade (só no modo TEMPO)
-    let finalRevenue = revenueFromTime + revenueFromOpportunity;
+    // Agora a receita final é APENAS o tempo recuperado
+    let finalRevenue = revenueFromTime;
 
     if (assumptions.capacityLimit) {
         // Assume 8h/dia de trabalho
         const maxMinutesPerMonth = (8 * 60) * workingDaysPerWeek * weeksPerMonth;
-        // Current productivity + new demand
-        // Note: This is an estimation. "cutsFromTime" is recycled time, not new LOAD. 
-        // New LOAD comes from "newClients". 
-        // However, we are calculating REVENUE GAIN, so we check if the TOTAL implicitly exceeds capacity?
-        // Let's stick to the prompt's logic:
-        const currentMinutes = (cutsFromTime + newClients) * data.cutDuration;
 
-        // If the NEW work exceeds available capacity (which is simplified here as total capacity? No, that's not right)
-        // Let's assume the user is already "full" or the "cutsFromTime" fills the gaps.
-        // Prompt logic:
+        // Current productivity + efficiency gain
+        const currentMinutes = cutsFromTime * data.cutDuration;
+
+        // Se o ganho de tempo tentar "ultrapassar" limites fisicos? (Lógica simplificada aqui)
+        // Na verdade, como é tempo recuperado, ele já "cabe" no dia pois era tempo desperdiçado.
+        // Mas mantemos a verificação de sanidade
         if (currentMinutes > maxMinutesPerMonth) {
-            // This logic in prompt is a bit weird (comparing gained minutes to TOTAL monthly capacity), 
-            // but maybe it means "If the GAIN is larger than a full shop?". 
-            // Likely it implies a ceiling on how much you can actually add.
-            // But let's accept the prompt's snippet:
             const capFactor = maxMinutesPerMonth / currentMinutes;
-            // Wait, if currentMinutes (gain) > maxMinutes (total month), that's definitely impossible.
-            // But typical gain is ~20h. Max month is ~160h. It won't trigger often unless inputs are huge.
-            // It acts as a sanity check.
             if (capFactor < 1) {
                 finalRevenue = finalRevenue * capFactor;
             }
@@ -192,25 +185,17 @@ export function calculateUnifiedROI(
         ? Math.ceil(totalCostMonthly / netMonthlyProfit)
         : 0; // 0 = "Não compensa" (loss-making scenario)
 
-    // 9. Calculate Effective Conversion for Charts ("Agendamentos Concretizados")
-    // This ensures the "Calls" chart differs between modes (Realista vs Otimista)
-    // Realista: Lower AI Efficiency, Lower Conversion
-    // Otimista: Higher AI Efficiency, Higher Conversion
-    const totalProjectedBookings = (callsAnswered * assumptions.conversionRate) + (aiRecovered * assumptions.conversionRate); // Approx effective bookings from system
-    // Note: The system ROI assumes "cutsFromTime" + "newClients". 
-    // "cutsFromTime" is recycled time, implying we fit more bookings.
-    // "newClients" is new bookings from missed calls.
-    // For the chart to "talk" to the revenue, we should probably scale the calls by the SYSTEM'S effective throughput.
-    // Let's use a "Performance Factor" relative to base.
-    // Base potential = callsPerMonth.
-    // System realized = totalProjectedBookings + cutsFromTime (converted to equivalent appts?).
-    // Simpler approach that satisfies the user:
-    // Show "Successful Bookings" expected under this scenario.
-    // Ratio:
-    // PATCH: Clamp effectiveConversionRate to prevent > 100% visual bugs
+    // 9. Calculate Effective Conversion for Charts
+    // Como removemos a "Oportunidade", a conversão efetiva é baseada apenas na recuperação de tempo
+    // convertida em equivalente a "novos cortes".
+    // Para visualização, mantemos a projeção de "se o tempo fosse agendamentos":
+    const cutsRecovered = cutsFromTime; // Cortes extras possíveis pelo tempo salvo
+
+    // Ratio: (Cortes Extras) / Chamadas Totais
+    // Isso é puramente visual para o gráfico de barras "mostrar algo" proporcional ao ganho
     const effectiveConversionRate = Math.min(
-        (totalProjectedBookings + cutsFromTime) / callsPerMonth,
-        1.5 // Max 150% of input calls (sanity check)
+        (cutsRecovered) / callsPerMonth,
+        1.5
     );
 
     // Generate Monthly Data
@@ -221,7 +206,7 @@ export function calculateUnifiedROI(
         effectiveSeasonality,
         data,
         assumptions,
-        effectiveConversionRate // Pass this new dynamic factor
+        effectiveConversionRate
     );
 
     // 10. Get startMonth seasonality factor for dynamic Card HOJE
@@ -243,8 +228,8 @@ export function calculateUnifiedROI(
         cutsLost: cutsFromTime,
         revenueLostTime: revenueFromTime,
         missedCalls: callsMissed,
-        clientsLost: newClients,
-        revenueLostCalls: revenueFromOpportunity,
+        clientsLost: newClients, // Será 0
+        revenueLostCalls: revenueFromOpportunity, // Será 0
 
         // Results
         totalBenefitMonthly: monthlyRevenue,
@@ -345,9 +330,9 @@ function generateMonthlyData(
         revenue *= safetyMargin;
 
         // Dynamic Calls Visualization
-        // ANCHOR LOGIC: baseCalls × relativeFactor × effectiveConversionRate
-        // This means: startMonth = baseCalls × 1.0 × convRate = baseCalls (if convRate≈1)
-        let calls = Math.round(baseCalls * relativeFactor * effectiveConversionRate);
+        // ANCHOR LOGIC: baseCalls × relativeFactor
+        // Shows actual call volume per month, adjusted for seasonality
+        let calls = Math.round(baseCalls * relativeFactor);
 
         // Apply stress penalty logic if applicable (high season stress)
         if (useSeasonality && isRealistaMode && monthFactor > 1.15) {
