@@ -1,6 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalculationResults } from './ResultsCards';
+import { CalculationResults } from '@/components/results/ResultsCards';
 
 interface ComparisonChartProps {
   results: CalculationResults;

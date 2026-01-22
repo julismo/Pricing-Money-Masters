@@ -1,6 +1,6 @@
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, ReferenceLine, Line, ComposedChart } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CalculationResults } from '@/utils/roiCalculations';
+import { CalculationResults } from '@/types';
 
 interface CashflowChartProps {
     results: CalculationResults;

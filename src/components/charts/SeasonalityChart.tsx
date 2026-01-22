@@ -1,6 +1,6 @@
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid, Cell } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CalculationResults } from '@/utils/roiCalculations';
+import { CalculationResults } from '@/types';
 
 interface SeasonalityChartProps {
     results: CalculationResults;

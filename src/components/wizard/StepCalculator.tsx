@@ -1,4 +1,4 @@
-import { CalculatorForm, FormData } from '@/components/CalculatorForm';
+import { CalculatorForm, FormData } from '@/components/forms/CalculatorForm';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 

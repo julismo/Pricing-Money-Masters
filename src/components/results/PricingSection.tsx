@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { DollarSign, Clock, ChevronDown, ChevronUp, Calendar, User, Bot, TrendingDown } from 'lucide-react';
-import { CalculationResults } from '@/utils/roiCalculations';
+import { CalculationResults } from '@/types';
 
 interface PricingSectionProps {
     results: CalculationResults;

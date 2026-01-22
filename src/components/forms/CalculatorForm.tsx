@@ -18,7 +18,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { UnifiedFormData } from '@/utils/roiCalculations';
+import { UnifiedFormData } from '@/types';
 
 interface CalculatorFormProps {
   onCalculate: (data: UnifiedFormData) => void;

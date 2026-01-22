@@ -1,34 +1,11 @@
 import { Phone, Clock, Scissors, TrendingDown, TrendingUp, CheckCircle2, Rocket, DollarSign, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AnimatedNumber } from './AnimatedNumber';
+import { AnimatedNumber } from '@/components/common/AnimatedNumber';
 import { PricingSection } from './PricingSection';
+import { CalculationResults } from '@/types';
 
-export interface CalculationResults {
-  mode: 'tempo' | 'oportunidade';
-  isSeasonal?: boolean;
-  startMonthSeasonalityFactor?: number;
-  callsPerMonth: number;
-  minutesInCalls: number;
-  realTimeLost: number;
-  hoursLost: number;
-  cutsLost: number;
-  revenueLostTime: number;
-  missedCalls: number;
-  clientsLost: number;
-  revenueLostCalls: number;
-  totalBenefitMonthly: number;
-  totalBenefitYearly: number;
-  variableCost: number;
-  totalCostMonthly: number;
-  totalCostYearly: number;
-  netProfitYearly: number;
-  roiPercent: number;
-  paybackMonths: number;
-  impliedHourlyRate: number;
-  aiSafetyMargin: number;
-  lowVolumeWarning?: boolean;
-  recommendedSetup: number;
-}
+// Re-export for backward compatibility
+export type { CalculationResults };
 
 interface ResultsCardsProps {
   results: CalculationResults;

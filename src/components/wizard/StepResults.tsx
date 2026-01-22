@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ResultsCards, CalculationResults } from '@/components/ResultsCards';
-import { ComparisonChart } from '@/components/ComparisonChart';
-import { CashflowChart } from '@/components/CashflowChart';
-import { SeasonalityChart } from '@/components/SeasonalityChart';
-import { DetailedBreakdown } from '@/components/DetailedBreakdown';
-import { PricingSection } from '@/components/PricingSection';
+import { ResultsCards, CalculationResults } from '@/components/results/ResultsCards';
+import { ComparisonChart } from '@/components/charts/ComparisonChart';
+import { CashflowChart } from '@/components/charts/CashflowChart';
+import { SeasonalityChart } from '@/components/charts/SeasonalityChart';
+import { DetailedBreakdown } from '@/components/results/DetailedBreakdown';
+import { PricingSection } from '@/components/results/PricingSection';
 import { Button } from '@/components/ui/button';
 import { RefreshCcw, TrendingUp, Anchor, BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';

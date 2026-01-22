@@ -5,9 +5,10 @@ import { StepNiche } from '@/components/wizard/StepNiche';
 import { StepSolutions } from '@/components/wizard/StepSolutions';
 import { StepCalculator } from '@/components/wizard/StepCalculator';
 import { StepResults } from '@/components/wizard/StepResults';
-import { UnifiedFormData, calculateUnifiedROI, CalculationResults } from '@/utils/roiCalculations';
+import { calculateUnifiedROI } from '@/utils/roiCalculations';
+import { UnifiedFormData, CalculationResults } from '@/types';
 import { Card } from '@/components/ui/card';
-import { LoadingAnalysis } from '@/components/LoadingAnalysis';
+import { LoadingAnalysis } from '@/components/common/LoadingAnalysis';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);

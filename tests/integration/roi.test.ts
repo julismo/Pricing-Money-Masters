@@ -1,4 +1,3 @@
-
 // STANDALONE VALIDATION SCRIPT (No imports, purely for math verification)
 
 // 1. DATA
@@ -28,8 +27,25 @@ const AI_EFFICIENCY_RATE = 0.75;
 const BASE_NO_SHOW_RATE = 0.15;
 const NO_SHOW_RECOVERY_FACTOR = 0.30;
 
+interface InputData {
+    callsPerWeek: number;
+    callDuration: number;
+    cutDuration: number;
+    averageTicket: number;
+    missedCallsPercent: number;
+    workingDays: number;
+}
+
+interface Results {
+    totalBenefitYearly: number;
+    roiPercent: number;
+    paybackMonths: number;
+    netProfitYearly: number;
+    auditROI: number;
+}
+
 // 2. LOGIC
-function calculateProductivityGains(monthlyFactor, baseOccupancy = 0.65) {
+function calculateProductivityGains(monthlyFactor: number, baseOccupancy = 0.65): number {
     const currentOccupancy = baseOccupancy * monthlyFactor;
 
     // 1. UPPER BOUND: If barber is too busy, they can't squeeze in more cuts (Capacity Limit)
@@ -46,7 +62,7 @@ function calculateProductivityGains(monthlyFactor, baseOccupancy = 0.65) {
     return 1.0; // Sweet spot (Occupancy 60-65%)
 }
 
-function calculateSeasonalROI(data) {
+function calculateSeasonalROI(data: InputData): Results {
     const baseCallsPerMonth = Math.round(data.callsPerWeek * WEEKS_PER_MONTH);
     const baseMissedRate = data.missedCallsPercent / 100;
 
@@ -112,7 +128,7 @@ function calculateSeasonalROI(data) {
 }
 
 // 3. RUN
-const inputData = {
+const inputData: InputData = {
     callsPerWeek: 35,
     callDuration: 2,
     cutDuration: 45,
@@ -139,4 +155,3 @@ if (results.roiPercent > 400 && results.roiPercent < 750) {
 } else {
     console.log("❌ ROI OUT OF RANGE (Expected 400-750%)");
 }
-

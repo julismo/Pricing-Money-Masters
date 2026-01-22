@@ -1,6 +1,11 @@
-// tests/debug_paradox.js
+// tests/debug/debug_paradox.test.ts
 
-const SEASONALITY_FACTORS = [
+interface SeasonalityFactor {
+    month: string;
+    factor: number;
+}
+
+const SEASONALITY_FACTORS: SeasonalityFactor[] = [
     { month: 'Janeiro', factor: 0.75 },
     { month: 'Fevereiro', factor: 0.80 },
     { month: 'Março', factor: 0.85 },
@@ -15,7 +20,7 @@ const SEASONALITY_FACTORS = [
     { month: 'Dezembro', factor: 1.20 },
 ];
 
-function calculateProductivityGains(monthlyFactor, baseOccupancy = 0.65) {
+function calculateProductivityGains(monthlyFactor: number, baseOccupancy = 0.65): number {
     const currentOccupancy = baseOccupancy * monthlyFactor;
     // Current Logic:
     if (currentOccupancy > 0.85) return 0;
@@ -50,12 +55,14 @@ if (avgFactor < 1.0) {
 console.log("\n--- PARADOX CHECK ---");
 // Check low months
 const lowMonth = SEASONALITY_FACTORS.find(m => m.factor < 0.8);
-const lowOcc = 0.65 * lowMonth.factor;
-const lowGains = calculateProductivityGains(lowMonth.factor, 0.65);
+if (lowMonth) {
+    const lowOcc = 0.65 * lowMonth.factor;
+    const lowGains = calculateProductivityGains(lowMonth.factor, 0.65);
 
-if (lowOcc < 0.50 && lowGains > 0) {
-    console.log(`🚨 PARADOX FOUND: In ${lowMonth.month}, occupancy is ${(lowOcc * 100).toFixed(0)}% (EMPTY shop), but we award +${lowGains} cuts/day!`);
-    console.log("   Reason: 'Efficiency' assumes latent demand. If shop is empty, efficiency = €0 revenue.");
-} else {
-    console.log("Paradox not clearly visible with these inputs.");
+    if (lowOcc < 0.50 && lowGains > 0) {
+        console.log(`🚨 PARADOX FOUND: In ${lowMonth.month}, occupancy is ${(lowOcc * 100).toFixed(0)}% (EMPTY shop), but we award +${lowGains} cuts/day!`);
+        console.log("   Reason: 'Efficiency' assumes latent demand. If shop is empty, efficiency = €0 revenue.");
+    } else {
+        console.log("Paradox not clearly visible with these inputs.");
+    }
 }
