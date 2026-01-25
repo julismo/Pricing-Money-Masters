@@ -12,6 +12,29 @@ export function CashflowChart({ results, customSetup, customMaintenance }: Cashf
     // Use recommended setup if not provided, maintenance defaults to 0 (consultant fee)
     const setup = customSetup ?? results.recommendedSetup;
     const consultantFee = customMaintenance ?? 0; // Consultant's monthly fee (NOT infra)
+    
+    // #region agent log
+    fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            location: 'CashflowChart.tsx:13',
+            message: 'CashflowChart Setup Values',
+            data: {
+                customSetup: customSetup ?? null,
+                recommendedSetup: results.recommendedSetup,
+                finalSetup: setup,
+                customMaintenance: customMaintenance ?? null,
+                finalMaintenance: consultantFee,
+                mode: results.mode
+            },
+            timestamp: Date.now(),
+            sessionId: 'debug-session',
+            runId: 'run1',
+            hypothesisId: 'F'
+        })
+    }).catch(() => {});
+    // #endregion
 
     // Enrich data with cumulative investment cost
     // Investment = Setup (one time) + Consultant Fee × months

@@ -12,14 +12,8 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ results, realisticResults, optimisticResults, onPricingChange }: PricingSectionProps) {
-    // Calculate average-based Setup (fair price = 25% of average yearly benefit)
-    const averageBasedSetup = useMemo(() => {
-        if (realisticResults && optimisticResults) {
-            const avgYearly = (realisticResults.totalBenefitYearly + optimisticResults.totalBenefitYearly) / 2;
-            return Math.round(avgYearly * 0.25);
-        }
-        return results.recommendedSetup; // Fallback to active mode
-    }, [realisticResults, optimisticResults, results.recommendedSetup]);
+    // Pricing Strategy State (Default 30% - Premium)
+    const [pricingStrategy, setPricingStrategy] = useState<0.20 | 0.25 | 0.30>(0.30);
 
     const averageYearlyBenefit = useMemo(() => {
         if (realisticResults && optimisticResults) {
@@ -28,34 +22,145 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
         return results.totalBenefitYearly;
     }, [realisticResults, optimisticResults, results.totalBenefitYearly]);
 
-    // Calculate average-based Maintenance (same logic: 25% of average monthly benefit)
+    // Calculate Setup based on Strategy % (No artificial floors)
+    const calculatedSetup = useMemo(() => {
+        const baseValue = averageYearlyBenefit;
+        const setup = Math.round(baseValue * pricingStrategy);
+
+        // #region agent log
+        if (import.meta.env.DEV) {
+            fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    location: 'PricingSection.tsx:28',
+                    message: 'Setup Calculation',
+                    data: {
+                        averageYearlyBenefit: Math.round(baseValue),
+                        pricingStrategy: pricingStrategy * 100,
+                        calculatedSetup: setup,
+                        realisticYearly: realisticResults ? Math.round(realisticResults.totalBenefitYearly) : null,
+                        optimisticYearly: optimisticResults ? Math.round(optimisticResults.totalBenefitYearly) : null,
+                        realisticRecommended: realisticResults ? Math.round(realisticResults.recommendedSetup) : null,
+                        optimisticRecommended: optimisticResults ? Math.round(optimisticResults.recommendedSetup) : null
+                    },
+                    timestamp: Date.now(),
+                    sessionId: 'debug-session',
+                    runId: 'run1',
+                    hypothesisId: 'B'
+                })
+            }).catch(() => { });
+        }
+        // #endregion
+        return setup;
+    }, [averageYearlyBenefit, pricingStrategy, realisticResults, optimisticResults]);
+
+    // Calculate average-based Maintenance (25% of monthly benefit)
     const averageBasedMaintenance = useMemo(() => {
+        let maintenance;
         if (realisticResults && optimisticResults) {
             const avgMonthly = (realisticResults.totalBenefitMonthly + optimisticResults.totalBenefitMonthly) / 2;
-            return Math.round(avgMonthly * 0.25);
+            maintenance = Math.round(avgMonthly * 0.25);
+        } else {
+            maintenance = Math.round(results.totalBenefitMonthly * 0.25);
         }
-        return Math.round(results.totalBenefitMonthly * 0.25);
+        // #region agent log
+        if (import.meta.env.DEV) {
+            fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    location: 'PricingSection.tsx:37',
+                    message: 'Maintenance Calculation',
+                    data: {
+                        maintenance,
+                        realisticMonthly: realisticResults ? Math.round(realisticResults.totalBenefitMonthly) : null,
+                        optimisticMonthly: optimisticResults ? Math.round(optimisticResults.totalBenefitMonthly) : null,
+                        currentMonthly: Math.round(results.totalBenefitMonthly),
+                        percentage: 25
+                    },
+                    timestamp: Date.now(),
+                    sessionId: 'debug-session',
+                    runId: 'run1',
+                    hypothesisId: 'C'
+                })
+            }).catch(() => { });
+        }
+        // #endregion
+        return maintenance;
     }, [realisticResults, optimisticResults, results.totalBenefitMonthly]);
 
-    // Default values - Setup and Maintenance use average-based calculation
-    const [customSetup, setCustomSetup] = useState<number>(averageBasedSetup);
-    const [customMaintenance, setCustomMaintenance] = useState<number>(averageBasedMaintenance); // 25% of monthly benefit
-    const [contractMonths, setContractMonths] = useState<number>(4); // Default 4 month contract
+    // State for custom overrides
+    const [customSetup, setCustomSetup] = useState<number>(calculatedSetup);
+    const [customMaintenance, setCustomMaintenance] = useState<number>(averageBasedMaintenance);
+    const [contractMonths, setContractMonths] = useState<number>(6); // Default 6 month contract
     const [showConfig, setShowConfig] = useState(false);
 
-    // Calculate payback with custom values
-    // Payback = Setup / (Monthly Benefit - Infra Cost - Maintenance Fee)
+    // Update custom setup when strategy changes (but allow manual override if needed)
+    useEffect(() => {
+        setCustomSetup(calculatedSetup);
+    }, [calculatedSetup]);
+
+    // Calculate payback
     const paybackData = useMemo(() => {
         const monthlyBenefit = results.totalBenefitMonthly;
-        const infraCost = results.totalCostMonthly; // This is the system infra cost (hidden)
+        const infraCost = results.totalCostMonthly;
         const totalMonthlyOutflow = infraCost + customMaintenance;
         const netMonthlyGain = monthlyBenefit - totalMonthlyOutflow;
 
         if (netMonthlyGain <= 0) {
+            // #region agent log
+            if (import.meta.env.DEV) {
+                fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: 'PricingSection.tsx:58',
+                        message: 'Payback Not Viable',
+                        data: {
+                            monthlyBenefit: Math.round(monthlyBenefit),
+                            infraCost: Math.round(infraCost),
+                            customMaintenance,
+                            totalMonthlyOutflow: Math.round(totalMonthlyOutflow),
+                            netMonthlyGain: Math.round(netMonthlyGain)
+                        },
+                        timestamp: Date.now(),
+                        sessionId: 'debug-session',
+                        runId: 'run1',
+                        hypothesisId: 'D'
+                    })
+                }).catch(() => { });
+            }
+            // #endregion
             return { months: 0, isViable: false };
         }
 
         const paybackMonths = Math.ceil(customSetup / netMonthlyGain);
+        // #region agent log
+        if (import.meta.env.DEV) {
+            fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    location: 'PricingSection.tsx:62',
+                    message: 'Payback Calculation',
+                    data: {
+                        customSetup,
+                        netMonthlyGain: Math.round(netMonthlyGain),
+                        paybackMonths,
+                        contractMonths,
+                        withinContract: paybackMonths <= contractMonths,
+                        monthlyBenefit: Math.round(monthlyBenefit),
+                        totalMonthlyOutflow: Math.round(totalMonthlyOutflow)
+                    },
+                    timestamp: Date.now(),
+                    sessionId: 'debug-session',
+                    runId: 'run1',
+                    hypothesisId: 'E'
+                })
+            }).catch(() => { });
+        }
+        // #endregion
         return {
             months: paybackMonths,
             isViable: true,
@@ -94,11 +199,27 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
     return (
         <Card className="card-shadow-lg mt-4 border-0">
             <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <CardTitle className="flex items-center gap-2 text-slate-700 text-lg">
                         <DollarSign className="h-5 w-5" />
                         O Teu Investimento
                     </CardTitle>
+
+                    {/* Strategy Selector */}
+                    <div className="flex bg-slate-100 p-1 rounded-lg">
+                        {[0.20, 0.25, 0.30].map((strategy) => (
+                            <button
+                                key={strategy}
+                                onClick={() => setPricingStrategy(strategy as any)}
+                                className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${pricingStrategy === strategy
+                                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200'
+                                    : 'text-slate-500 hover:text-slate-700'
+                                    }`}
+                            >
+                                {strategy * 100}%
+                            </button>
+                        ))}
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -9,13 +9,14 @@ const WORKING_DAYS_MAP = {
 };
 
 // MODO A: TEMPO (Default - Realista)
+// MODO A: TEMPO (Default - Realista)
 const TEMPO_ASSUMPTIONS = {
-    utilizationFactor: 0.65,        // 65% do tempo recuperado vira cortes
+    utilizationFactor: 0.75,        // 75% do tempo recuperado vira cortes (Revised up from 65%)
     aiEfficiency: 0.80,             // 80% das perdidas a IA resolve
     conversionRate: 0.85,           // 85% convertem em marcação
     capacityLimit: true,            // Respeita limite de horas/dia
     contextSwitch: 3,               // 3 min de penalização
-    safetyMargin: 0.90              // NEW: 10% extra safety margin (conservative)
+    safetyMargin: 1.00              // 100% (No artificial safety margin penalty)
 };
 
 // MODO B: OPORTUNIDADE (Otimista - Potencial Máximo)
@@ -43,6 +44,23 @@ export function calculateUnifiedROI(
     data: UnifiedFormData
 ): CalculationResults {
 
+    // 0. Validação de Inputs (Edge Cases)
+    if (data.cutDuration <= 0) {
+        throw new Error("Tempo de corte deve ser maior que zero");
+    }
+    if (data.averageTicket <= 0) {
+        throw new Error("Valor médio do corte deve ser maior que zero");
+    }
+    if (data.callsPerWeek < 0) {
+        throw new Error("Número de chamadas não pode ser negativo");
+    }
+    if (data.callDuration < 0) {
+        throw new Error("Duração da chamada não pode ser negativa");
+    }
+    if (data.missedCallsPercent < 0 || data.missedCallsPercent > 100) {
+        throw new Error("Percentual de chamadas perdidas deve estar entre 0 e 100");
+    }
+
     // 1. Selecionar Assumptions
     const assumptions = data.calculationMode === "tempo"
         ? TEMPO_ASSUMPTIONS
@@ -64,30 +82,38 @@ export function calculateUnifiedROI(
     const cutsFromTime = convertibleMinutes / data.cutDuration;
     const revenueFromTime = cutsFromTime * data.averageTicket;
 
-    // 5. VETOR 2: Oportunidade (Chamadas Perdidas) - REMOVIDO POR SER ESPECULATIVO
-    // Mantemos as variaveis zeradas para compatibilidade de UI se necessário, mas não somamos à receita
+    // 5. VETOR 2: Oportunidade (Chamadas Perdidas)
+    // Re-enabled to show true potential value, even in Realistic mode
     const aiRecovered = callsMissed * assumptions.aiEfficiency;
-    // const newClients = aiRecovered * assumptions.conversionRate; // REMOVIDO
-    const newClients = 0; // Forçamos 0 pois não é quantificável
-    const revenueFromOpportunity = 0; // Forçamos 0 pois não é quantificável
+
+    // In Realistic mode, we apply a 50% conservative factor to the opportunity
+    // This allows us to acknowledge the value without being overly optimistic
+    const opportunityFactor = data.calculationMode === "tempo" ? 0.50 : 1.0;
+
+    // Calculate new clients with the factor
+    const newClients = aiRecovered * assumptions.conversionRate * opportunityFactor;
+
+    // Revenue from additional clients (Ticket Médio * Novos Clientes)
+    const revenueFromOpportunity = newClients * data.averageTicket;
 
     // 6. Limitação de Capacidade (só no modo TEMPO)
-    // Agora a receita final é APENAS o tempo recuperado
-    let finalRevenue = revenueFromTime;
+    // Agora a receita final é a SOMA dos dois vetores (Tempo + Oportunidade)
+    let finalRevenue = revenueFromTime + revenueFromOpportunity;
 
     if (assumptions.capacityLimit) {
         // Assume 8h/dia de trabalho
         const maxMinutesPerMonth = (8 * 60) * workingDaysPerWeek * weeksPerMonth;
 
-        // Current productivity + efficiency gain
-        const currentMinutes = cutsFromTime * data.cutDuration;
+        // CORREÇÃO: Considerar TODOS os cortes (tempo recuperado + novos clientes)
+        // Antes só considerava cutsFromTime, agora inclui newClients também
+        const totalCuts = cutsFromTime + newClients;
+        const totalMinutes = totalCuts * data.cutDuration;
 
-        // Se o ganho de tempo tentar "ultrapassar" limites fisicos? (Lógica simplificada aqui)
-        // Na verdade, como é tempo recuperado, ele já "cabe" no dia pois era tempo desperdiçado.
-        // Mas mantemos a verificação de sanidade
-        if (currentMinutes > maxMinutesPerMonth) {
-            const capFactor = maxMinutesPerMonth / currentMinutes;
+        // Se o total de cortes (ganho de tempo + novos clientes) exceder capacidade física
+        if (totalMinutes > maxMinutesPerMonth) {
+            const capFactor = maxMinutesPerMonth / totalMinutes;
             if (capFactor < 1) {
+                // Aplicar fator de capacidade proporcionalmente à receita
                 finalRevenue = finalRevenue * capFactor;
             }
         }
@@ -185,6 +211,46 @@ export function calculateUnifiedROI(
         aiSafetyMargin: (1 - assumptions.aiEfficiency) * 100,
         lowVolumeWarning: callsPerMonth < 40, // NEW: Warn if less than ~10 calls/week
         recommendedSetup: Math.round(yearlyRevenue * 0.20), // NEW: 20% of yearly value = fair price
+
+        // #region agent log (apenas em desenvolvimento)
+        // Debug: Log calculation results for pricing validation
+        ...(() => {
+            // Apenas executar em modo desenvolvimento para evitar erros em produção
+            // Vite: import.meta.env.MODE === 'development' ou import.meta.env.DEV
+            // Safe check for Node environment (testing) where import.meta.env is undefined
+            const isDev = typeof import.meta.env !== 'undefined' && import.meta.env.MODE === 'development';
+            if (isDev) {
+                fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        location: 'roiCalculations.ts:195',
+                        message: 'ROI Calculation Complete',
+                        data: {
+                            mode: data.calculationMode,
+                            yearlyRevenue: Math.round(yearlyRevenue),
+                            recommendedSetup: Math.round(yearlyRevenue * 0.20),
+                            monthlyRevenue: Math.round(monthlyRevenue),
+                            totalCostYearly: Math.round(totalCostYearly),
+                            netProfitYearly: Math.round(netProfitYearly),
+                            roiPercent: Math.round(roiPercent),
+                            paybackMonths,
+                            callsPerMonth,
+                            cutsFromTime: Math.round(cutsFromTime * 10) / 10,
+                            revenueFromTime: Math.round(revenueFromTime),
+                            revenueFromOpportunity: Math.round(revenueFromOpportunity),
+                            newClients: Math.round(newClients * 10) / 10
+                        },
+                        timestamp: Date.now(),
+                        sessionId: 'debug-session',
+                        runId: 'run1',
+                        hypothesisId: 'A'
+                    })
+                }).catch(() => { });
+            }
+            return {};
+        })(),
+        // #endregion
 
         // Metadata
         assumptions: {
