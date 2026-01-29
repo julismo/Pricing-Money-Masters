@@ -1,29 +1,38 @@
-# 💻 ROI Calculator SaaS - Application Documentation
+# 💻 ROI Calculator SaaS - Documentation
+> **Root**: `docs/ROI_SaaS_App/`
 
-> **Context:** This directory documents the React Application code (The "Software"). Use this context when rewriting components, fixing bugs, or adjusting the ROI logic.
+---
 
-## 📂 Documentation Structure
+## 🏗️ Structure Overview: "The Sales Engine"
 
-### 1. [Business_Context](./Business_Context/) (New) 🧠
-> **The Logic Behind the Code.**
-- **`politica_precos/`**: Maintenance pricing & SaaStiers (The "Why" behind the numbers).
-- **`analise_tecnica_sistema/`**: Critical analysis of the algorithms.
-- **`diagnosticos/`**: Bug reports and fix recommendations.
+This documentation covers the **Software Application** used to sell the Voice Agency services. It contains both the *Business Logic* (Why we build it) and the *Technical Implementation* (How we build it).
 
-### 2. Codebase Structure (`src/`) ⚙️
-- **`src/utils/roiCalculations.ts`**: The math implementation.
-- **`src/types/`**: TypeScript interfaces.
-- **`src/components/`**: React UI components.
+### 📂 1. `Business_Context` (The Strategy)
+> **"The Brain behind the Calculator"**
 
-## 🚀 Key Concepts for AI
+This folder contains the strategic decisions that dictate how the calculator works.
+*   **`politica_precos/`**: Explains the €150/month maintenance fee vs the "Anti-SaaS" model. (Crucial for the "Pricing" step in the app).
+*   **`analise_tecnica_sistema/`**: Audits of the mathematical models (Realistic vs Optimistic modes).
+*   **`diagnosticos/`**: Historical bug reports and system health checks.
 
-- **Purpose**: Sales tool to demonstrate value.
-- **Pricing Logic**: See `Business_Context/politica_precos/CRITICA_POLITICA_PRECOS.md`.
-- **Validation**: See `Business_Context/analise_tecnica_sistema/ANALISE_CRITICA_SISTEMA.md`.
+### 📂 2. Technical Documentation (The Code)
+> **"The Engine"**
 
-## 🛠️ How to Run
+*   **Main Logic:** `src/utils/roiCalculations.ts` ( The TS implementation of the Business Context).
+*   **Frontend:** React + TypeScript + Vite.
+*   **Styling:** TailwindCSS.
 
-```bash
-npm install
-npm run dev
-```
+---
+
+## ⚡ Quick Actions
+
+- **To Change the Pricing Model:**
+    1.  Read `Business_Context/politica_precos/CRITICA_POLITICA_PRECOS.md` to understand the strategy.
+    2.  Update `src/components/Calculator/PricingSection.tsx`.
+
+- **To Fix a Calculation Bug:**
+    1.  Check `Business_Context/analise_tecnica_sistema/` for known logic constraints.
+    2.  Update `src/utils/roiCalculations.ts`.
+
+---
+*Maintained by: Antigravity Agent*
