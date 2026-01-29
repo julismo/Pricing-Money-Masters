@@ -83,7 +83,7 @@ Nosso Manual Técnico não é apenas para "funcionar bem". Ele é uma **Arma de 
 
 ### Fase 2: Escala & Cashflow
 *   **Meta:** 20-30 Clientes Ativos.
-*   **Modelo:** Setup agressivo (€400-€600) para fazer caixa + Zeladoria (€150) para pagar operação.
+*   **Modelo:** Setup agressivo (€400-€600) para fazer caixa + Zeladoria (€50) para pagar operação.
 *   **Produto:** Pacote Fechado (Voz + WhatsApp + Agendamento). Não vender "só voz". Vender "Recepção Completa".
 
 ### Fase 3: High-Ticket (A Mina de Ouro)
