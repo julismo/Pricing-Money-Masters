@@ -47,7 +47,7 @@ export function Stepper({ currentStep }: StepperProps) {
                                 )}
                             </div>
                             <span
-                                className={`text-xs font-semibold uppercase tracking-wider ${isActive ? 'text-primary' : isCompleted ? 'text-primary' : 'text-slate-400'
+                                className={`text-[10px] md:text-xs font-semibold uppercase tracking-wider text-center hidden md:block ${isActive ? 'text-primary' : isCompleted ? 'text-primary' : 'text-slate-400'
                                     }`}
                             >
                                 {step.label}

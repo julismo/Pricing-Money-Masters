@@ -23,7 +23,7 @@ export function StepNiche({ onNext, onBack }: StepNicheProps) {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 px-2">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-2">
         {/* Card: Barbearia */}
         <div
           onClick={() => onNext('barbearia')}

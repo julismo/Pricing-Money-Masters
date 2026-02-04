@@ -406,7 +406,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                         <h4 className="text-sm font-semibold text-emerald-800">Comparação de Custo</h4>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {/* Receptionist Comparison - Portugal barbershop context */}
                         {/* Google/Perplexity: SMN €870 + TSU ~€207 + overhead = ~€1.100-1.400 */}
                         {/* Using €800-1.200 (bruto range) for simpler client communication */}
@@ -486,7 +486,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                             <Calendar className="h-3 w-3" />
                             Configuração do consultor
                         </p>
-                        <div className="grid grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label className="text-xs text-slate-500">Setup (€)</label>
                                 <Input

@@ -249,11 +249,11 @@ export function CalculatorForm({ niche, objective, onCalculate }: CalculatorForm
 
   return (
     <Card className="card-shadow-lg border-0 bg-white/90 backdrop-blur-sm overflow-hidden">
-      <CardContent className="p-8">
+      <CardContent className="p-4 md:p-8">
         <form onSubmit={handleSubmit} className="space-y-8">
 
           {/* Header with context */}
-          <div className="bg-slate-50 rounded-xl p-5 border border-slate-100 flex items-center justify-between">
+          <div className="bg-slate-50 rounded-xl p-4 md:p-5 border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="h-10 w-10 rounded-full bg-white border border-slate-100 flex items-center justify-center text-lg shadow-sm">
                 🏷️
@@ -263,14 +263,14 @@ export function CalculatorForm({ niche, objective, onCalculate }: CalculatorForm
                 <p className="font-bold text-slate-900 text-lg">{nicheConfig.label}</p>
               </div>
             </div>
-            <div className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${objective === 'time' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
+            <div className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 w-full md:w-auto justify-center ${objective === 'time' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
               }`}>
               {objective === 'time' ? <Clock className="w-4 h-4" /> : <TrendingUp className="w-4 h-4" />}
               {objective === 'time' ? 'Poupar Tempo' : 'Gerar Dinheiro'}
             </div>
           </div>
 
-          <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
 
             {/* Common: Working Days */}
             <div className="space-y-2 group">
