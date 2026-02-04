@@ -51,20 +51,33 @@ export function FeedbackButton() {
         setIsSubmitting(true);
 
         try {
-            const formData = new FormData();
-            formData.append('feedback', feedback);
-            formData.append('email', email);
-            formData.append('url', window.location.href);
-            formData.append('userAgent', navigator.userAgent);
-            formData.append('timestamp', new Date().toISOString());
-
+            // Convert screenshot to base64 if exists
+            let screenshotData = null;
             if (screenshot) {
-                formData.append('screenshot', screenshot);
+                const reader = new FileReader();
+                const base64 = await new Promise<string>((resolve) => {
+                    reader.onloadend = () => resolve(reader.result as string);
+                    reader.readAsDataURL(screenshot);
+                });
+                screenshotData = {
+                    filename: screenshot.name,
+                    content: base64.split(',')[1], // Remove data:image/png;base64, prefix
+                };
             }
 
             const response = await fetch('/api/feedback', {
                 method: 'POST',
-                body: formData,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    feedback,
+                    email,
+                    url: window.location.href,
+                    userAgent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    screenshot: screenshotData,
+                }),
             });
 
             if (!response.ok) {
