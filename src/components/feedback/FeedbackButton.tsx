@@ -19,6 +19,7 @@ export function FeedbackButton() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedback, setFeedback] = useState('');
     const [contact, setContact] = useState('');
+    const [links, setLinks] = useState('');
     const { toast } = useToast();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +43,7 @@ export function FeedbackButton() {
                 {
                     contact: contact || 'Anónimo',
                     message: feedback,
+                    links: links,
                     url: window.location.href,
                     user_agent: navigator.userAgent,
                     timestamp: new Date().toLocaleString('pt-PT'),
@@ -58,6 +60,7 @@ export function FeedbackButton() {
             setIsOpen(false);
             setFeedback('');
             setContact('');
+            setLinks('');
         } catch (error) {
             console.error('EmailJS error:', error);
             toast({
@@ -94,18 +97,31 @@ export function FeedbackButton() {
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         {/* Contact (Optional) */}
+                        {/* Contact (Optional) */}
                         <div className="space-y-2">
-                            <Label htmlFor="contact">Contato (opcional)</Label>
+                            <Label htmlFor="contact">Contacto (opcional)</Label>
                             <Input
                                 id="contact"
                                 type="text"
-                                placeholder="Email, telefone, WhatsApp..."
+                                placeholder="Email, WhatsApp ou Instagram..."
                                 value={contact}
                                 onChange={(e) => setContact(e.target.value)}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Deixe o seu contato se quiser receber uma resposta.
+                                Deixa o teu contacto se quiseres receber uma resposta.
                             </p>
+                        </div>
+
+                        {/* Links / Files */}
+                        <div className="space-y-2">
+                            <Label htmlFor="links">Links / Arquivos (Loom, Imagens, Drive)</Label>
+                            <Input
+                                id="links"
+                                type="text"
+                                placeholder="Cola aqui links de vídeos, prints ou documentos..."
+                                value={links}
+                                onChange={(e) => setLinks(e.target.value)}
+                            />
                         </div>
 
                         {/* Feedback Text */}
