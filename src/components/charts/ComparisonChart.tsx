@@ -26,9 +26,10 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
   ];
 
   // Calculate Payback Month
-  const totalSetupCost = results.setupFee;
+  // Use recommendedSetup (20% of annual revenue) as the Investment Basis
+  const totalSetupCost = results.recommendedSetup || 0;
   const monthlyNetProfit = results.totalBenefitMonthly - results.totalCostMonthly;
-  const monthsToPayback = Math.ceil(totalSetupCost / monthlyNetProfit);
+  const monthsToPayback = monthlyNetProfit > 0 ? Math.ceil(totalSetupCost / monthlyNetProfit) : 0;
 
   // Get current month index (0-11)
   const currentMonthIndex = new Date().getMonth();
