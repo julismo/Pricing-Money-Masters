@@ -48,9 +48,14 @@ export function CalculatorForm({ niche, objective, onCalculate }: CalculatorForm
 
   // Initialize defaults based on current niche config
   useEffect(() => {
+    // Common inputs
     const defaults = getDefaultsForNiche(niche);
     const stringDefaults: Record<string, string> = {};
     Object.entries(defaults).forEach(([key, value]) => {
+      // Don't set initial value for volumeInput and ticketInput to show transparent placeholder
+      if (key === nicheConfig.commonInputs.volumeInput.id || key === nicheConfig.commonInputs.ticketInput.id) {
+        return;
+      }
       stringDefaults[key] = value.toString();
     });
     setFormValues(stringDefaults);
@@ -198,7 +203,23 @@ export function CalculatorForm({ niche, objective, onCalculate }: CalculatorForm
           )}
         </div>
 
-        {input.type === 'percent' ? (
+        {input.id === 'callDuration' || input.id === 'reservationCallDuration' || input.id === 'confirmationCallDuration' ? (
+          <Select
+            value={value}
+            onValueChange={(val: string) => handleInputChange(input.id, val)}
+          >
+            <SelectTrigger id={input.id} className="input-refined">
+              <SelectValue placeholder="Selecionar duração" />
+            </SelectTrigger>
+            <SelectContent>
+              {[1, 2, 3, 4, 5].map((min) => (
+                <SelectItem key={min} value={min.toString()}>
+                  {min} min
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : input.type === 'percent' ? (
           <Select
             value={value || input.defaultValue.toString()}
             onValueChange={(val: string) => handleInputChange(input.id, val)}
