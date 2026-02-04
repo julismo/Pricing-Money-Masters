@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { MessageSquare, X, Send, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { MessageSquare, X, Loader2, Send } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -41,8 +42,8 @@ export function FeedbackButton() {
 
         if (!feedback.trim()) {
             toast({
-                title: 'Feedback vazio',
-                description: 'Por favor, escreva o seu feedback antes de enviar.',
+                title: 'Campo obrigatório',
+                description: 'Por favor, escreve o teu feedback.',
                 variant: 'destructive',
             });
             return;
@@ -51,50 +52,31 @@ export function FeedbackButton() {
         setIsSubmitting(true);
 
         try {
-            // Convert screenshot to base64 if exists
-            let screenshotData = null;
-            if (screenshot) {
-                const reader = new FileReader();
-                const base64 = await new Promise<string>((resolve) => {
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.readAsDataURL(screenshot);
-                });
-                screenshotData = {
-                    filename: screenshot.name,
-                    content: base64.split(',')[1], // Remove data:image/png;base64, prefix
-                };
-            }
-
-            const response = await fetch('/api/feedback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    feedback,
-                    email,
+            await emailjs.send(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
+                {
+                    from_email: email || 'Anónimo',
+                    message: feedback,
                     url: window.location.href,
-                    userAgent: navigator.userAgent,
-                    timestamp: new Date().toISOString(),
-                    screenshot: screenshotData,
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro ao enviar feedback');
-            }
+                    user_agent: navigator.userAgent,
+                    timestamp: new Date().toLocaleString('pt-PT'),
+                },
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
+            );
 
             toast({
-                title: 'Feedback enviado! 🎉',
-                description: 'Obrigado pela sua contribuição. Vamos analisar em breve!',
+                title: 'Feedback enviado!',
+                description: 'Obrigado pelo teu contributo. 🎉',
             });
 
             // Reset form
+            setIsOpen(false);
             setFeedback('');
             setEmail('');
             setScreenshot(null);
-            setIsOpen(false);
         } catch (error) {
+            console.error('EmailJS error:', error);
             toast({
                 title: 'Erro ao enviar',
                 description: 'Tente novamente ou contacte-nos diretamente.',
