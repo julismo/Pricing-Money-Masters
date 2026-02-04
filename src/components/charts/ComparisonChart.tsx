@@ -26,24 +26,19 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
   ];
 
   // Calculate Payback Month
-  // Use recommendedSetup (20% of annual revenue) as the Investment Basis
-  const totalSetupCost = results.recommendedSetup || 0;
-  const monthlyNetProfit = results.totalBenefitMonthly - results.totalCostMonthly;
-  const monthsToPayback = monthlyNetProfit > 0 ? Math.ceil(totalSetupCost / monthlyNetProfit) : 0;
+  // Usar o valor calculado no utilitário que considera a relação Custo Mensal / Lucro Mensal
+  // Isso garante que se o lucro cobre o custo, o retorno é "1 Mês" (imediato)
+  let monthsToPayback = results.paybackMonths;
 
-  // Get current month index (0-11)
-  const currentMonthIndex = new Date().getMonth();
-  const paybackMonthIndex = (currentMonthIndex + monthsToPayback) % 12;
+  // Safety fallback
+  if (monthsToPayback === undefined || monthsToPayback === null) {
+    monthsToPayback = 0;
+  }
 
-  const monthNames = [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ];
-
-  const paybackMonthName = monthNames[paybackMonthIndex];
+  // Fallback text is handled in render
   const paybackText = monthsToPayback <= 1
-    ? 'no primeiro mês'
-    : `em ${paybackMonthName}`;
+    ? '1 Mês'
+    : `${monthsToPayback} Meses`;
 
   return (
     <Card className="p-6">
@@ -102,12 +97,12 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
       </div>
 
       <div className="mt-6 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 p-6 text-center">
-        <p className="text-sm font-medium text-emerald-800 uppercase tracking-wide opacity-80 mb-1">
-          Retorno do Investimento
-        </p>
-        <div className="flex flex-col items-center justify-center gap-2">
-          <p className="text-2xl md:text-3xl font-bold text-emerald-600">
-            O sistema paga-se sozinho {paybackText}
+        <div className="flex flex-col items-center justify-center gap-1">
+          <p className="text-lg font-medium text-emerald-700">
+            O sistema paga-se em
+          </p>
+          <p className="text-3xl font-bold text-emerald-600">
+            {monthsToPayback <= 1 ? '1 Mês' : `${monthsToPayback} Meses`}
           </p>
         </div>
       </div>

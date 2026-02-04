@@ -62,6 +62,15 @@ export function CalculatorForm({ niche, objective, onCalculate }: CalculatorForm
   }, [niche]);
 
   const handleInputChange = (id: string, value: string) => {
+    // Block negative numbers for numeric inputs
+    if (value.includes('-')) return;
+
+    // Strict non-negative check for number inputs
+    if (nicheConfig.inputs.some(i => i.id === id && i.type === 'number') ||
+      ['callsPerDay', 'avgTicket', 'missedCallRate', 'ticketPerPerson', 'leadsPerDay', 'avgCarValue', 'receptionistCost', 'consultationsPerDay', 'tablesCount', 'avgGroupSize', 'turnsPerDay', 'salesTeamSize', 'teamsSize'].includes(id)) {
+      if (Number(value) < 0) return;
+    }
+
     setFormValues(prev => ({
       ...prev,
       [id]: value
