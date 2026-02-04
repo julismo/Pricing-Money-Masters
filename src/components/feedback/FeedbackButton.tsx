@@ -18,24 +18,8 @@ export function FeedbackButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedback, setFeedback] = useState('');
-    const [email, setEmail] = useState('');
-    const [screenshot, setScreenshot] = useState<File | null>(null);
+    const [contact, setContact] = useState('');
     const { toast } = useToast();
-
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            if (file.size > 5 * 1024 * 1024) { // 5MB limit
-                toast({
-                    title: 'Ficheiro muito grande',
-                    description: 'Por favor, escolha uma imagem até 5MB.',
-                    variant: 'destructive',
-                });
-                return;
-            }
-            setScreenshot(file);
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,7 +40,7 @@ export function FeedbackButton() {
                 import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
                 import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
                 {
-                    from_email: email || 'Anónimo',
+                    contact: contact || 'Anónimo',
                     message: feedback,
                     url: window.location.href,
                     user_agent: navigator.userAgent,
@@ -73,8 +57,7 @@ export function FeedbackButton() {
             // Reset form
             setIsOpen(false);
             setFeedback('');
-            setEmail('');
-            setScreenshot(null);
+            setContact('');
         } catch (error) {
             console.error('EmailJS error:', error);
             toast({
@@ -110,18 +93,18 @@ export function FeedbackButton() {
                     </DialogHeader>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Email (Optional) */}
+                        {/* Contact (Optional) */}
                         <div className="space-y-2">
-                            <Label htmlFor="email">Email (opcional)</Label>
+                            <Label htmlFor="contact">Contato (opcional)</Label>
                             <Input
-                                id="email"
-                                type="email"
-                                placeholder="seu@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                id="contact"
+                                type="text"
+                                placeholder="Email, telefone, WhatsApp..."
+                                value={contact}
+                                onChange={(e) => setContact(e.target.value)}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Deixe o seu email se quiser receber uma resposta.
+                                Deixe o seu contato se quiser receber uma resposta.
                             </p>
                         </div>
 
@@ -138,41 +121,7 @@ export function FeedbackButton() {
                             />
                         </div>
 
-                        {/* Image Upload */}
-                        <div className="space-y-2">
-                            <Label htmlFor="file-upload">Anexar Imagem (opcional)</Label>
-                            <p className="text-xs text-muted-foreground mb-2">
-                                Pode anexar prints, imagens ou ficheiros até 5MB
-                            </p>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => document.getElementById('file-upload')?.click()}
-                                className="w-full"
-                            >
-                                📎 Escolher Ficheiro
-                            </Button>
-                            <input
-                                id="file-upload"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileUpload}
-                                className="hidden"
-                            />
-                            {screenshot && (
-                                <div className="flex items-center gap-2 rounded-md bg-muted p-2 text-sm">
-                                    <span className="flex-1 truncate">{screenshot.name}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setScreenshot(null)}
-                                        className="text-muted-foreground hover:text-foreground"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+
 
                         {/* Submit Button */}
                         <div className="flex gap-2 pt-4">

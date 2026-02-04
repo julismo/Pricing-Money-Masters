@@ -96,8 +96,8 @@ export const nicheConfigs: Record<string, NicheConfig> = {
                 id: 'receptionistCost',
                 label: 'Custo Mensal Receção (€)',
                 type: 'currency',
-                defaultValue: 1050,
-                description: 'Salário + encargos de uma recepcionista',
+                defaultValue: 1600,
+                description: 'Salário + encargos de uma recepcionista (2026)',
                 step: 50
             },
             {
@@ -152,8 +152,8 @@ export const nicheConfigs: Record<string, NicheConfig> = {
                 id: 'noShowRate',
                 label: 'Taxa de No-Show (%)',
                 type: 'percent',
-                defaultValue: 12,
-                description: 'Reservas que não comparecem',
+                defaultValue: 15,
+                description: 'Reservas que não comparecem (média PT sem sistema)',
                 step: 1
             },
             {
