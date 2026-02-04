@@ -1,7 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { DollarSign, Clock, ChevronDown, ChevronUp, Calendar, User, Bot, TrendingDown } from 'lucide-react';
+import { DollarSign, Clock, ChevronDown, ChevronUp, Calendar, User, Bot, TrendingDown, HelpCircle, FileDown } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { CalculationResults } from '@/types';
 
 interface PricingSectionProps {
@@ -55,7 +61,12 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
         return setup;
     }, [averageYearlyBenefit, pricingStrategy, realisticResults, optimisticResults]);
 
-    // Calculate average-based Maintenance (25% of monthly benefit)
+    // Maintenance pricing caps based on Perplexity research (Feb 2026)
+    // Industry benchmark: $199-300 max for any volume
+    const MAINTENANCE_CAP = 300; // €300/mês máximo
+    const MAINTENANCE_MIN = 40;  // €40/mês mínimo
+
+    // Calculate average-based Maintenance (25% of monthly benefit, with cap)
     // Rounded to nearest 5€ for cleaner pricing (40, 45, 50, 55...)
     const averageBasedMaintenance = useMemo(() => {
         let rawMaintenance;
@@ -67,7 +78,10 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
         }
 
         // Round to nearest 5€ (e.g. 53€ → 55€, 47€ → 45€)
-        const maintenance = Math.round(rawMaintenance / 5) * 5;
+        let maintenance = Math.round(rawMaintenance / 5) * 5;
+
+        // Apply cap (Perplexity benchmark: max €300/mês for Voice AI)
+        maintenance = Math.min(Math.max(maintenance, MAINTENANCE_MIN), MAINTENANCE_CAP);
 
         // #region agent log
         if (import.meta.env.DEV) {
@@ -299,7 +313,21 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     <div className="grid grid-cols-3 gap-4">
                         {/* Setup Cost */}
                         <div className="text-center">
-                            <p className="text-sm text-slate-500 mb-1">Implementação</p>
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                                <p className="text-sm text-slate-500">Implementação</p>
+                                <TooltipProvider>
+                                    <Tooltip delayDuration={200}>
+                                        <TooltipTrigger asChild>
+                                            <HelpCircle className="h-3.5 w-3.5 text-slate-400 cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs text-xs">
+                                            <p className="font-medium mb-1">Como calculamos:</p>
+                                            <p>{pricingStrategy * 100}% do benefício médio anual ({averageYearlyBenefit.toLocaleString('pt-PT')}€)</p>
+                                            <p className="mt-1 text-slate-300">Inclui: configuração, treino da IA, integração com agenda.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <p className="text-2xl font-bold text-slate-800">
                                 {customSetup}€
                             </p>
@@ -308,7 +336,21 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
 
                         {/* Maintenance Fee (Consultant) */}
                         <div className="text-center">
-                            <p className="text-sm text-slate-500 mb-1">Manutenção</p>
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                                <p className="text-sm text-slate-500">Manutenção</p>
+                                <TooltipProvider>
+                                    <Tooltip delayDuration={200}>
+                                        <TooltipTrigger asChild>
+                                            <HelpCircle className="h-3.5 w-3.5 text-slate-400 cursor-help" />
+                                        </TooltipTrigger>
+                                        <TooltipContent className="bg-slate-900 text-white p-3 max-w-xs text-xs">
+                                            <p className="font-medium mb-1">Como calculamos:</p>
+                                            <p>25% do benefício mensal médio (máx 300€)</p>
+                                            <p className="mt-1 text-slate-300">Cobre: suporte, actualizações, monitorização 24/7.</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </TooltipProvider>
+                            </div>
                             <p className="text-2xl font-bold text-slate-800">
                                 {customMaintenance > 0 ? `${customMaintenance}€` : '—'}
                             </p>
@@ -345,6 +387,64 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
 
                         </div>
                     )}
+
+                    {/* Export Button - Transparency for client */}
+                    <div className="mt-4 pt-4 border-t border-slate-200 text-center">
+                        <button
+                            onClick={() => {
+                                const explanation = `
+PROPOSTA DE INVESTIMENTO - Assistente IA Voice
+================================================
+
+📊 RESUMO DO INVESTIMENTO
+--------------------------
+Implementação: ${customSetup}€ (uma vez)
+Manutenção: ${customMaintenance}€/mês
+Contrato: ${contractMonths} meses
+Total: ${totalInvestment}€ (${contractMonths} meses)
+
+💡 COMO CALCULAMOS
+------------------
+IMPLEMENTAÇÃO (${pricingStrategy * 100}% do benefício anual):
+• Benefício anual estimado: ${averageYearlyBenefit.toLocaleString('pt-PT')}€
+• Cálculo: ${averageYearlyBenefit.toLocaleString('pt-PT')}€ × ${pricingStrategy * 100}% = ${customSetup}€
+• Inclui: configuração, treino da IA, integração com agenda
+
+MANUTENÇÃO (25% do benefício mensal, máx 300€):
+• Benefício mensal estimado: ${Math.round(averageYearlyBenefit / 12).toLocaleString('pt-PT')}€
+• Cálculo: ${Math.round(averageYearlyBenefit / 12).toLocaleString('pt-PT')}€ × 25% = ${customMaintenance}€
+• Cobre: suporte técnico, actualizações, monitorização 24/7
+
+📈 RETORNO DO INVESTIMENTO
+--------------------------
+• Payback estimado: ${paybackData.months} meses
+• A partir do mês ${paybackData.months + 1}, o sistema gera lucro líquido
+
+⚠️ NOTA IMPORTANTE
+------------------
+Estes valores são estimativas baseadas nos dados que forneceu.
+Os resultados reais podem variar consoante a operação.
+
+Gerado em: ${new Date().toLocaleDateString('pt-PT')}
+                                `.trim();
+
+                                // Create and download text file
+                                const blob = new Blob([explanation], { type: 'text/plain;charset=utf-8' });
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement('a');
+                                a.href = url;
+                                a.download = 'proposta_investimento_ia_voice.txt';
+                                document.body.appendChild(a);
+                                a.click();
+                                document.body.removeChild(a);
+                                URL.revokeObjectURL(url);
+                            }}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                            <FileDown className="h-4 w-4" />
+                            Exportar explicação dos cálculos
+                        </button>
+                    </div>
                 </div>
 
                 <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-100">
@@ -354,7 +454,9 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        {/* Receptionist Comparison (Mixed Reality) */}
+                        {/* Receptionist Comparison - Portugal barbershop context */}
+                        {/* Google/Perplexity: SMN €870 + TSU ~€207 + overhead = ~€1.100-1.400 */}
+                        {/* Using €800-1.200 (bruto range) for simpler client communication */}
                         <div className="bg-white/60 rounded-lg p-4 border border-slate-200">
                             <div className="flex items-center gap-2 mb-2">
                                 <User className="h-4 w-4 text-slate-500" />
@@ -366,7 +468,6 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                                 <li>❌ Só horário comercial</li>
                                 <li>❌ Faltas e férias</li>
                                 <li>❌ Erros de agendamento</li>
-                                <li>❌ (Se tiver uma)</li>
                             </ul>
                         </div>
 
@@ -382,9 +483,9 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                             </p>
                             <ul className="text-xs text-emerald-600 mt-2 space-y-1">
                                 <li>✅ 24h/7 dias/365 dias</li>
-                                <li>✅ Nunca falha</li>
-                                <li>✅ Zero erros</li>
-                                <li>✅ Imagem profissional</li>
+                                <li>✅ Consistência alta</li>
+                                <li>✅ Sem faltas/férias</li>
+                                <li>✅ Resposta imediata</li>
                             </ul>
                         </div>
                     </div>
@@ -413,14 +514,6 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     </div>
                 </div>
 
-                {/* Sovereignty Seal - Trust Badge */}
-                <div className="bg-slate-50 rounded-lg p-3 border border-slate-200 flex items-center gap-3">
-                    <div className="text-2xl">🏛️</div>
-                    <div>
-                        <p className="text-sm font-medium text-slate-700">A Infraestrutura é Tua</p>
-                        <p className="text-xs text-slate-500">Sistema instalado no TEU servidor. Sem dependência, sem lock-in.</p>
-                    </div>
-                </div>
 
                 {/* Consultant Config Toggle - Only in Realista mode */}
                 {results.mode === 'tempo' && (

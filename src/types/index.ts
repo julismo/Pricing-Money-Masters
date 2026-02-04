@@ -15,12 +15,32 @@ export interface UnifiedFormData {
     useSeasonality: boolean; // Toggle "Considerar sazonalidade"
     calculationMode: "tempo" | "oportunidade"; // Toggle principal
     startMonth: string; // "0" to "11"
+
+    // Contexto
+    niche?: string; // e.g. 'barbearia', 'clinica', 'restaurante', 'automoveis'
+
+    // Campos Dinâmicos (Opcionais / Específicos por Nicho)
+    // Restaurante
+    tablesCount?: number;
+    ticketPerPerson?: number;
+    avgGroupSize?: number;
+    // Stand
+    leadsPerDay?: number;
+    avgCarValue?: number;
+    grossMargin?: number;
+    // Geral / Outros
+    teamSize?: number;
+    noShowRate?: number;
+    receptionistCost?: number;
+    missedCallsService?: number;
+    afterHoursLeads?: number;
 }
 
 export type FormData = UnifiedFormData; // Alias for backward compatibility
 
 export interface CalculationResults {
     mode: "tempo" | "oportunidade";
+    niche: string; // NEW: For dynamic UI terminology
     isSeasonal: boolean; // Added for UI logic
     startMonthSeasonalityFactor: number; // NEW: For dynamic Card HOJE
     callsPerMonth: number;

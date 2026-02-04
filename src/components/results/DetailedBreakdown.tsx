@@ -33,12 +33,23 @@ export function DetailedBreakdown({ results }: DetailedBreakdownProps) {
     });
   };
 
+  const getLabels = (niche?: string) => {
+    switch (niche) {
+      case 'clinica': return { unit: 'Consultas', lost: 'Consultas Perdidas' };
+      case 'restaurante': return { unit: 'Reservas', lost: 'Reservas Perdidas' };
+      case 'automoveis': return { unit: 'Vendas', lost: 'Vendas Perdidas' };
+      default: return { unit: 'Cortes', lost: 'Cortes Perdidos' };
+    }
+  };
+
+  const labels = getLabels(results.niche);
+
   const rows = [
     { label: 'Chamadas/mês', value: formatNumber(results.callsPerMonth) },
     { label: 'Chamadas Perdidas/mês', value: `~${formatNumber(results.missedCalls, 0)}` },
     { label: 'Tempo em Chamadas', value: `${formatNumber(results.minutesInCalls)} min` },
     { label: 'Tempo Perdido Total', value: `${formatNumber(results.realTimeLost)} min (${formatNumber(results.hoursLost, 1)}h)` },
-    { label: 'Cortes Perdidos', value: formatNumber(results.cutsLost, 1) },
+    { label: labels.lost, value: formatNumber(results.cutsLost, 1) },
     { label: 'Perda por Tempo', value: `${formatCurrency(results.revenueLostTime)}/mês` },
     // { label: 'Perda por Chamadas', value: `${formatCurrency(results.revenueLostCalls)}/mês` }, // Removed per user request
     { label: 'Perda Mensal (média)', value: formatCurrency(results.totalBenefitMonthly) },

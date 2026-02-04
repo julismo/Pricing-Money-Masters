@@ -3,11 +3,13 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 
 interface StepCalculatorProps {
+    niche: string;
+    objective: 'time' | 'money';
     onCalculate: (data: FormData) => void;
     onBack: () => void;
 }
 
-export function StepCalculator({ onCalculate, onBack }: StepCalculatorProps) {
+export function StepCalculator({ niche, objective, onCalculate, onBack }: StepCalculatorProps) {
     return (
         <div className="space-y-6 animate-fade-in-up">
             <div className="flex items-center justify-between relative mb-8">
@@ -20,7 +22,7 @@ export function StepCalculator({ onCalculate, onBack }: StepCalculatorProps) {
                 </div>
             </div>
 
-            <CalculatorForm onCalculate={onCalculate} />
+            <CalculatorForm niche={niche} objective={objective} onCalculate={onCalculate} />
         </div>
     );
 }

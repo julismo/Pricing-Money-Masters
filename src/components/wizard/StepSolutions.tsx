@@ -23,7 +23,7 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
             </div>
 
             <div className="grid md:grid-cols-3 gap-6">
-                {/* Card: Atendente de Voz (Active) */}
+                {/* Card: Atendente de Voz (Active - Production) */}
                 <Card
                     className="p-8 relative border-2 border-primary shadow-xl cursor-pointer bg-white transition-all hover:scale-[1.02] ring-4 ring-blue-50/50 group"
                     onClick={() => onNext('voice')}
@@ -41,12 +41,15 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
                     </div>
                 </Card>
 
-                {/* Card: Chatbot IA (Disabled) */}
-                <Card className="p-8 relative opacity-60 border border-slate-200 shadow-sm cursor-not-allowed bg-white grayscale overflow-hidden">
-                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Em breve</Badge>
+                {/* Card: Chatbot IA (Beta - Enabled) */}
+                <Card
+                    className="p-8 relative border-2 border-slate-100 shadow-lg cursor-pointer bg-white transition-all hover:scale-[1.02] hover:border-primary hover:ring-4 hover:ring-blue-50 overflow-hidden"
+                    onClick={() => onNext('chat')}
+                >
+                    <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200 z-10">Beta</Badge>
                     <div className="flex flex-col items-start gap-6 pt-2">
-                        <div className="h-12 w-12 rounded-lg bg-slate-50 flex items-center justify-center">
-                            <MessageSquare className="h-6 w-6 text-slate-400" />
+                        <div className="h-12 w-12 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <MessageSquare className="h-6 w-6 text-amber-600" />
                         </div>
                         <div className="text-left space-y-2">
                             <h3 className="text-lg font-bold text-slate-900">Chatbot IA</h3>
@@ -57,12 +60,15 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
                     </div>
                 </Card>
 
-                {/* Card: Combo (Disabled) */}
-                <Card className="p-8 relative opacity-60 border border-slate-200 shadow-sm cursor-not-allowed bg-white grayscale overflow-hidden">
-                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Em breve</Badge>
+                {/* Card: Combo (Beta - Enabled) */}
+                <Card
+                    className="p-8 relative border-2 border-slate-100 shadow-lg cursor-pointer bg-white transition-all hover:scale-[1.02] hover:border-primary hover:ring-4 hover:ring-blue-50 overflow-hidden"
+                    onClick={() => onNext('both')}
+                >
+                    <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200 z-10">Beta</Badge>
                     <div className="flex flex-col items-start gap-6 pt-2">
-                        <div className="h-12 w-12 rounded-lg bg-slate-50 flex items-center justify-center">
-                            <Zap className="h-6 w-6 text-slate-400" />
+                        <div className="h-12 w-12 rounded-lg bg-amber-50 flex items-center justify-center">
+                            <Zap className="h-6 w-6 text-amber-600" />
                         </div>
                         <div className="text-left space-y-2">
                             <h3 className="text-lg font-bold text-slate-900">Combo (Voz + Chat)</h3>
@@ -83,7 +89,7 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
                         <div className="text-left space-y-2">
                             <h3 className="text-lg font-bold text-slate-900">Gestão de Reviews</h3>
                             <p className="text-sm text-slate-500 leading-relaxed">
-                                Autuomação de respostas no Google Maps e gestão de reputação.
+                                Automação de respostas no Google Maps e gestão de reputação.
                             </p>
                         </div>
                     </div>
@@ -109,3 +115,4 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
         </div>
     );
 }
+

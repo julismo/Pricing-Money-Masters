@@ -67,20 +67,87 @@ export function calculateUnifiedROI(
         : OPORTUNIDADE_ASSUMPTIONS;
 
     // 2. Ajustar por Dias Úteis
-    const workingDaysPerWeek = WORKING_DAYS_MAP[data.workingDays] || 5; // Default to 5 if undefined
+    const workingDaysPerWeek = WORKING_DAYS_MAP[data.workingDays] || 6;
     const weeksPerMonth = 4.3;
 
-    // 3. Volume Base
-    const callsPerMonth = Math.round(data.callsPerWeek * weeksPerMonth);
-    const missedRate = data.missedCallsPercent / 100;
-    const callsMissed = Math.round(callsPerMonth * missedRate);
+    // 3. Normalização de Volume e Ticket por Nicho
+    // Adapta os inputs específicos (ex: Restaurante, Stand) para as métricas universais
+    let baseCallsPerMonth = 0;
+    let baseAverageTicket = data.averageTicket; // Fallback
+
+    // Safety check for niche
+    const niche = data.niche || 'barbearia';
+
+    switch (niche) {
+        case 'restaurante':
+            // Restaurante: Volume é Reservas/Chamadas por dia
+            // Ticket é (Ticket por Pessoa * Pessoas por Mesa) OU apenas Ticket por Pessoa se assumirmos reservas individuais
+            // Niche config define: ticketPerPerson, avgGroupSize
+            // Vamos assumir que "Ticket" para ROI é o valor da MESA (reserva) salva
+            {
+                const callsDay = data.callsPerDay || 25; // Fallback
+                baseCallsPerMonth = Math.round(callsDay * workingDaysPerWeek * weeksPerMonth);
+
+                const tPerPerson = data.ticketPerPerson || 35;
+                const gSize = data.avgGroupSize || 3;
+                baseAverageTicket = tPerPerson * gSize;
+            }
+            break;
+
+        case 'automoveis':
+            // Stand: Volume é Leads (entradas)
+            // Ticket é Margem Bruta (não valor do carro, pois isso inflacionaria o ROI)
+            {
+                const leadsDay = data.leadsPerDay || 15;
+                // Leads funcionam 7 dias/semana geralmente em digital, mas vamos usar workingDays do input para consistência
+                baseCallsPerMonth = Math.round(leadsDay * workingDaysPerWeek * weeksPerMonth);
+
+                // CRITICAL: Use Gross Margin instead of Full Car Value for ROI
+                baseAverageTicket = data.grossMargin || 2000;
+            }
+            break;
+
+        case 'clinica':
+            // Clínica: Igual a barbearia (Chamadas, Ticket)
+            // Inputs: callsPerDay, avgTicket
+            {
+                const cDay = data.callsPerDay || 30;
+                baseCallsPerMonth = Math.round(cDay * workingDaysPerWeek * weeksPerMonth);
+                // baseAverageTicket já vem de data.averageTicket (mapeado no form) ou data.avgTicket
+                if (data.avgTicket) baseAverageTicket = data.avgTicket;
+            }
+            break;
+
+        case 'barbearia':
+        default:
+            // Fallback standard calculation (used by Barber)
+            // Prioritize callsPerDay input if available (dynamic form) over callsPerWeek
+            if (data.callsPerDay) {
+                baseCallsPerMonth = Math.round(data.callsPerDay * workingDaysPerWeek * weeksPerMonth);
+            } else {
+                baseCallsPerMonth = Math.round(data.callsPerWeek * weeksPerMonth);
+            }
+            break;
+    }
+
+    // Override generic calcs with normalized values
+    const callsPerMonth = baseCallsPerMonth;
+
+    // Recalculate callsPerWeek for consistency in return object if needed (reverse map)
+    // data.callsPerWeek = Math.round(baseCallsPerMonth / weeksPerMonth); // Optional update
+
+    const missedRate = data.missedCallRate ? (data.missedCallRate / 100) : (data.missedCallsPercent / 100);
+    // Fallback if NaN
+    const safeMissedRate = isNaN(missedRate) ? 0.30 : missedRate;
+
+    const callsMissed = Math.round(callsPerMonth * safeMissedRate);
     const callsAnswered = callsPerMonth - callsMissed;
 
     // 4. VETOR 1: Tempo Recuperado (Chamadas Atendidas)
     const timeWastedMinutes = callsAnswered * (data.callDuration + assumptions.contextSwitch);
     const convertibleMinutes = timeWastedMinutes * assumptions.utilizationFactor;
     const cutsFromTime = convertibleMinutes / data.cutDuration;
-    const revenueFromTime = cutsFromTime * data.averageTicket;
+    const revenueFromTime = cutsFromTime * baseAverageTicket;
 
     // 5. VETOR 2: Oportunidade (Chamadas Perdidas)
     // Re-enabled to show true potential value, even in Realistic mode
@@ -215,6 +282,7 @@ export function calculateUnifiedROI(
 
     return {
         mode: data.calculationMode,
+        niche: niche, // Pass through for UI
         isSeasonal: effectiveSeasonality,
         startMonthSeasonalityFactor, // NEW: Allows Card HOJE to dynamically reflect start month
         callsPerMonth,

@@ -9,6 +9,7 @@ import { calculateUnifiedROI } from '@/utils/roiCalculations';
 import { UnifiedFormData, CalculationResults } from '@/types';
 import { Card } from '@/components/ui/card';
 import { LoadingAnalysis } from '@/components/common/LoadingAnalysis';
+import { FeedbackButton } from '@/components/feedback/FeedbackButton';
 
 const Index = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -18,6 +19,9 @@ const Index = () => {
     optimistic: CalculationResults;
   } | null>(null);
 
+  // Store wizard selections
+  const [objective, setObjective] = useState<'time' | 'money'>('time');
+  const [niche, setNiche] = useState<string>('barbearia');
   const [automationType, setAutomationType] = useState<string>('voice');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisDuration, setAnalysisDuration] = useState(2000);
@@ -33,16 +37,19 @@ const Index = () => {
   };
 
   const handleValueTypeSelect = (type: 'time' | 'money') => {
-    console.log('Selected type:', type);
+    console.log('Selected objective:', type);
+    setObjective(type);
     nextStep();
   };
 
-  const handleNicheSelect = (niche: string) => {
-    console.log('Selected niche:', niche);
+  const handleNicheSelect = (selectedNiche: string) => {
+    console.log('Selected niche:', selectedNiche);
+    setNiche(selectedNiche);
     nextStep();
   };
 
   const handleSolutionSelect = (type: string) => {
+    console.log('Selected solution:', type);
     setAutomationType(type);
     nextStep();
   };
@@ -120,6 +127,8 @@ const Index = () => {
 
                 {currentStep === 4 && (
                   <StepCalculator
+                    niche={niche}
+                    objective={objective}
                     onCalculate={handleCalculate}
                     onBack={prevStep}
                   />
@@ -140,8 +149,11 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="mt-12 text-center text-sm text-slate-400">
-        <p>© 2026 Barber ROI. Definindo o futuro da gestão de barbearias.</p>
+        <p>Feito com ❤️ e ☕ • 2026</p>
       </footer>
+
+      {/* Floating Feedback Button */}
+      <FeedbackButton />
     </div>
   );
 };

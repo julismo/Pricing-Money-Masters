@@ -12,6 +12,17 @@ interface ResultsCardsProps {
 }
 
 export function ResultsCards({ results }: ResultsCardsProps) {
+  const getLabels = (niche?: string) => {
+    switch (niche) {
+      case 'clinica': return { unit: 'consultas', lost: 'consultas perdidas', revenue: 'faturação perdida' };
+      case 'restaurante': return { unit: 'reservas', lost: 'reservas perdidas', revenue: 'faturação perdida' };
+      case 'automoveis': return { unit: 'vendas', lost: 'vendas perdidas', revenue: 'margem perdida' };
+      default: return { unit: 'cortes', lost: 'cortes perdidos', revenue: 'faturação que escapa' };
+    }
+  };
+
+  const labels = getLabels(results.niche);
+
   return (
     <div className="animate-fade-in-up space-y-6">
       {/* Low Volume Warning Banner */}
@@ -89,7 +100,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold">
                   <AnimatedNumber value={results.cutsLost} decimals={1} />
                 </p>
-                <p className="text-sm text-muted-foreground">cortes perdidos</p>
+                <p className="text-sm text-muted-foreground">{labels.lost}</p>
               </div>
             </div>
 
@@ -107,7 +118,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                   />/mês
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  faturação que escapa
+                  {labels.revenue}
                 </p>
               </div>
             </div>

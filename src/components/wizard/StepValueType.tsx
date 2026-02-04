@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 interface StepValueTypeProps {
-  onNext: () => void;
+  onNext: (type: 'time' | 'money') => void;
 }
 
 export function StepValueType({ onNext }: StepValueTypeProps) {
@@ -15,12 +15,15 @@ export function StepValueType({ onNext }: StepValueTypeProps) {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Card 1: Gerar Dinheiro (Disabled) */}
-        <Card className="p-8 relative opacity-60 border border-slate-200 shadow-sm cursor-not-allowed bg-white grayscale overflow-hidden">
-          <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Em breve</Badge>
-          <div className="flex flex-col items-center text-center gap-6 pt-4"> {/* Added pt-4 to avoid overlap */}
-            <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center">
-              <TrendingUp className="h-8 w-8 text-slate-400" />
+        {/* Card 1: Gerar Dinheiro (Beta - Enabled) */}
+        <Card
+          className="p-8 relative border-2 border-slate-100 shadow-lg cursor-pointer bg-white transition-all hover:scale-[1.02] hover:border-primary hover:ring-4 hover:ring-blue-50 overflow-hidden"
+          onClick={() => onNext('money')}
+        >
+          <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200 z-10">Beta</Badge>
+          <div className="flex flex-col items-center text-center gap-6 pt-4">
+            <div className="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center">
+              <TrendingUp className="h-8 w-8 text-blue-600" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-slate-900">Gerar Dinheiro</h3>
@@ -31,10 +34,10 @@ export function StepValueType({ onNext }: StepValueTypeProps) {
           </div>
         </Card>
 
-        {/* Card 2: Poupar Tempo (Active) */}
+        {/* Card 2: Poupar Tempo (Active - Production) */}
         <Card
           className="p-8 relative border-2 border-primary shadow-xl cursor-pointer bg-white transition-all hover:scale-[1.02] ring-4 ring-blue-50/50"
-          onClick={onNext}
+          onClick={() => onNext('time')}
         >
           <div className="flex flex-col items-center text-center gap-6">
             <div className="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center">
@@ -59,3 +62,4 @@ export function StepValueType({ onNext }: StepValueTypeProps) {
     </div>
   );
 }
+
