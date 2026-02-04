@@ -187,3 +187,71 @@ Seu objetivo era encontrar a "gordura" para cortes de 30%. A realidade é que 57
 2. Testar Deepgram Aura para voice (latência aceitável para R&D?)
 3. Implementar alertas de billing no Anthropic + Deepgram para rastrear overages
 4. Reavaliar em Q2 2026 com dados reais de utilização
+
+---
+
+## ADENDA: CUSTOS DE PRODUÇÃO PARA CLIENTES (Fev 2026)
+
+> **Atualização:** Esta seção documenta os custos reais de operação do sistema Voice AI quando implantado em clientes (barbearias).
+
+### Modelo de Custos Implementado no ROI Calculator
+
+O sistema agora usa **custos dinâmicos** baseados no volume real de chamadas do cliente.
+
+#### Tabela de Custos por Componente
+
+| Componente | Valor | Fonte |
+|------------|-------|-------|
+| **Retell AI** | €0.14/min | Média (€0.13-€0.15), all-in: STT + LLM + TTS + Telephony |
+| **Twilio Número PT** | €15.00/mês | Número móvel (+351 9xx) |
+| **SMS PT** | €0.043/msg × 1.2/cliente = €0.052 | Confirmação + 20% cancellations |
+
+#### Escalonamento de Servidor por Volume
+
+O custo do servidor (Hetzner) escala automaticamente com o volume de chamadas:
+
+| Chamadas/Dia | Servidor | Custo/Mês | Inclui |
+|--------------|----------|-----------|--------|
+| 1-30 | CX23 (4GB) | €4.20 | Backups |
+| 31-100 | CPX22 (4GB) | €9.46 | Backups, AMD EPYC |
+| 101-200 | CPX32 (8GB) | €14.99 | Backups |
+| 201+ | CPX42 (16GB) | €25.99 | Backups |
+
+#### Exemplo: Barbearia Típica (70 chamadas/semana, 3 min/chamada)
+
+```
+Chamadas/mês: 70 × 4.3 = 301
+Chamadas/dia: 301 / 26 = ~12 (→ CX23)
+
+CUSTOS MENSAIS:
+- Servidor (CX23):     €4.20
+- Twilio Número:       €15.00
+- Retell AI (901 min): €126.14  (301 × 3 × €0.14)
+- SMS (361 msgs):      €15.53   (301 × 1.2 × €0.043)
+---------------------------------------
+TOTAL:                 €160.87/mês
+```
+
+#### Implementação no Código
+
+Os custos estão definidos em `src/utils/roiCalculations.ts`:
+
+```typescript
+const COST_CONFIG = {
+    server: {
+        tiers: [
+            { maxCallsDay: 30, cost: 4.20, name: 'CX23 (4GB)' },
+            { maxCallsDay: 100, cost: 9.46, name: 'CPX22 (4GB)' },
+            { maxCallsDay: 200, cost: 14.99, name: 'CPX32 (8GB)' },
+            { maxCallsDay: Infinity, cost: 25.99, name: 'CPX42 (16GB)' }
+        ]
+    },
+    twilio: { mobileNumber: 15.00 },
+    retell: { perMin: 0.14 },
+    sms: { perMessage: 0.043, avgPerClient: 1.2 }
+};
+```
+
+---
+
+**Última Atualização:** 4 de Fevereiro de 2026

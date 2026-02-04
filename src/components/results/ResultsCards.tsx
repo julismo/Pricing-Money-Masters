@@ -1,7 +1,7 @@
 import { Phone, Clock, Scissors, TrendingDown, TrendingUp, CheckCircle2, Rocket, DollarSign, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AnimatedNumber } from '@/components/common/AnimatedNumber';
-import { PricingSection } from './PricingSection';
+import { CostBreakdown } from './CostBreakdown';
 import { CalculationResults } from '@/types';
 
 // Re-export for backward compatibility
@@ -32,11 +32,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
       )}
 
       {/* Current Situation Card */}
-      <Card className="card-shadow-lg border-l-4 border-l-loss">
+      <Card className="shadow-sm border border-slate-200/80">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-loss">
-            <TrendingDown className="h-5 w-5" />
-            HOJE
+          <CardTitle className="flex items-center gap-2 text-slate-600">
+            <TrendingDown className="h-5 w-5 text-loss" />
+            Situação Atual
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -50,7 +50,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold">
                   <AnimatedNumber value={results.callsPerMonth} />
                 </p>
-                <p className="text-sm text-muted-foreground">chamadas/mês</p>
+                <p className="text-sm text-muted-foreground">chamadas recebidas</p>
               </div>
             </div>
 
@@ -62,7 +62,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold text-loss">
                   ~<AnimatedNumber value={Math.round(results.missedCalls)} />
                 </p>
-                <p className="text-sm text-muted-foreground">perdidas/mês</p>
+                <p className="text-sm text-muted-foreground">não atendidas</p>
               </div>
             </div>
 
@@ -74,7 +74,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold">
                   <AnimatedNumber value={results.hoursLost} decimals={1} suffix="h" />
                 </p>
-                <p className="text-sm text-muted-foreground">horas perdidas</p>
+                <p className="text-sm text-muted-foreground">em atendimento</p>
               </div>
             </div>
           </div>
@@ -107,7 +107,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                   />/mês
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  oportunidade perdida
+                  faturação que escapa
                 </p>
               </div>
             </div>
@@ -120,7 +120,7 @@ export function ResultsCards({ results }: ResultsCardsProps) {
                 <p className="text-2xl font-bold text-loss">
                   ~<AnimatedNumber value={Math.round(results.totalBenefitYearly)} suffix="€" />/ano
                 </p>
-                <p className="text-sm text-muted-foreground">que podes recuperar</p>
+                <p className="text-sm text-muted-foreground">receita recuperável</p>
               </div>
             </div>
           </div>
@@ -128,11 +128,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
       </Card>
 
       {/* With System Card */}
-      <Card className="card-shadow-lg border-l-4 border-l-success">
+      <Card className="shadow-sm border border-emerald-200/80 bg-gradient-to-br from-white to-emerald-50/30">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-success">
+          <CardTitle className="flex items-center gap-2 text-emerald-700">
             <TrendingUp className="h-5 w-5" />
-            COM AUTOMAÇÃO
+            Com o Sistema Activo 24/7
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -189,6 +189,13 @@ export function ResultsCards({ results }: ResultsCardsProps) {
               </div>
             </div>
           </div>
+
+          {/* Cost Breakdown - Detalhamento de custos */}
+          <CostBreakdown
+            costBreakdown={results.costBreakdown}
+            serverTier={results.serverTier}
+            totalCostMonthly={results.totalCostMonthly}
+          />
         </CardContent>
       </Card>
     </div>

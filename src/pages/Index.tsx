@@ -140,7 +140,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="mt-12 text-center text-sm text-slate-400">
-        <p>Sim, a Barber ROI é feita em 2026.</p>
+        <p>© 2026 Barber ROI. Definindo o futuro da gestão de barbearias.</p>
       </footer>
     </div>
   );

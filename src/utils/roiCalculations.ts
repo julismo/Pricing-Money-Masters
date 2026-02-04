@@ -12,7 +12,7 @@ const WORKING_DAYS_MAP = {
 // MODO A: TEMPO (Default - Realista)
 const TEMPO_ASSUMPTIONS = {
     utilizationFactor: 0.75,        // 75% do tempo recuperado vira cortes (Revised up from 65%)
-    aiEfficiency: 0.80,             // 80% das perdidas a IA resolve
+    aiEfficiency: 0.82,             // 82% das perdidas a IA resolve (benchmark: 85-99%)
     conversionRate: 0.85,           // 85% convertem em marcação
     capacityLimit: true,            // Respeita limite de horas/dia
     contextSwitch: 3,               // 3 min de penalização
@@ -32,7 +32,7 @@ const OPORTUNIDADE_ASSUMPTIONS = {
 // NEW: Ramp-up factors for first months (simulates implementation learning curve)
 // Only applies to TEMPO (Realista) mode
 const RAMP_UP_FACTORS = [
-    0.55,  // Month 1: 55% efficiency (implementation phase)
+    0.60,  // Month 1: 60% efficiency (implementation phase - benchmark 60-70%)
     0.85,  // Month 2: 85% efficiency (stabilization)
     0.95,  // Month 3: 95% efficiency (near-optimal)
     1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00  // Month 4+: 100%
@@ -86,9 +86,9 @@ export function calculateUnifiedROI(
     // Re-enabled to show true potential value, even in Realistic mode
     const aiRecovered = callsMissed * assumptions.aiEfficiency;
 
-    // In Realistic mode, we apply a 50% conservative factor to the opportunity
-    // This allows us to acknowledge the value without being overly optimistic
-    const opportunityFactor = data.calculationMode === "tempo" ? 0.50 : 1.0;
+    // In Realistic mode, we apply a 60% conservative factor to the opportunity
+    // Benchmark: 80% engagement real, using 60% to stay conservative
+    const opportunityFactor = data.calculationMode === "tempo" ? 0.60 : 1.0;
 
     // Calculate new clients with the factor
     const newClients = aiRecovered * assumptions.conversionRate * opportunityFactor;
@@ -119,12 +119,47 @@ export function calculateUnifiedROI(
         }
     }
 
-    // 7. Custos
-    // PATCH: Variable cost fixed to €0.12/min (per provider table)
-    const COST_PER_MIN = 0.12;
-    const variableCost = (callsPerMonth * data.callDuration) * COST_PER_MIN;
-    const INFRA_COST = 22; // €22/month base infrastructure
-    const totalCostMonthly = INFRA_COST + variableCost;
+    // 7. Custos Dinâmicos (Fev 2026 - Pesquisa de Mercado)
+    // Configuração de custos realistas por componente
+    const COST_CONFIG = {
+        // Servidor Hetzner (por faixa de chamadas/dia)
+        server: {
+            tiers: [
+                { maxCallsDay: 30, cost: 4.20, name: 'CX23 (4GB)' },      // CX23 + backups
+                { maxCallsDay: 100, cost: 9.46, name: 'CPX22 (4GB)' },   // CPX22 + backups  
+                { maxCallsDay: 200, cost: 14.99, name: 'CPX32 (8GB)' },  // CPX32 + backups
+                { maxCallsDay: Infinity, cost: 25.99, name: 'CPX42 (16GB)' } // CPX42 + backups
+            ]
+        },
+        // Twilio Portugal
+        twilio: {
+            mobileNumber: 15.00,    // €/mês
+            inboundPerMin: 0.009    // €/min
+        },
+        // Retell AI (min: 0.13, max: 0.15, média: 0.14)
+        retell: {
+            perMin: 0.14  // €/min (all-in: STT + LLM + TTS + Telephony)
+        },
+        // SMS Portugal
+        sms: {
+            perMessage: 0.043,  // €/msg
+            avgPerClient: 1.2   // Confirmação + 20% cancelamentos
+        }
+    };
+
+    // Calcular servidor baseado no volume de chamadas
+    const callsPerDay = callsPerMonth / (workingDaysPerWeek * weeksPerMonth);
+    const serverTier = COST_CONFIG.server.tiers.find(t => callsPerDay <= t.maxCallsDay)
+        ?? COST_CONFIG.server.tiers.at(-1)!;
+
+    // Breakdown de custos
+    const serverCost = serverTier.cost;
+    const twilioNumberCost = COST_CONFIG.twilio.mobileNumber;
+    const retellCost = (callsPerMonth * data.callDuration) * COST_CONFIG.retell.perMin;
+    const smsCost = callsPerMonth * COST_CONFIG.sms.avgPerClient * COST_CONFIG.sms.perMessage;
+
+    const variableCost = retellCost + smsCost;
+    const totalCostMonthly = serverCost + twilioNumberCost + variableCost;
     const totalCostYearly = totalCostMonthly * 12;
 
     // 8. ROI
@@ -211,6 +246,15 @@ export function calculateUnifiedROI(
         aiSafetyMargin: (1 - assumptions.aiEfficiency) * 100,
         lowVolumeWarning: callsPerMonth < 40, // NEW: Warn if less than ~10 calls/week
         recommendedSetup: Math.round(yearlyRevenue * 0.20), // NEW: 20% of yearly value = fair price
+
+        // NEW: Breakdown de custos para UI
+        costBreakdown: {
+            server: serverCost,
+            twilioNumber: twilioNumberCost,
+            retellAI: retellCost,
+            sms: smsCost
+        },
+        serverTier: serverTier.name, // Ex: "CPX22 (4GB)"
 
         // #region agent log (apenas em desenvolvimento)
         // Debug: Log calculation results for pricing validation

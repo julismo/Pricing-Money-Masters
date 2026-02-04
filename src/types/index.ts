@@ -49,6 +49,15 @@ export interface CalculationResults {
     lowVolumeWarning: boolean; // NEW: True if callsPerMonth < 40
     recommendedSetup: number; // NEW: 20% of totalBenefitYearly (fair price suggestion)
 
+    // NEW: Breakdown de custos para UI
+    costBreakdown: {
+        server: number;
+        twilioNumber: number;
+        retellAI: number;
+        sms: number;
+    };
+    serverTier: string; // Ex: "CPX22 (4GB)"
+
     // Metadata
     assumptions: {
         utilization: number;

@@ -56,14 +56,19 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
     }, [averageYearlyBenefit, pricingStrategy, realisticResults, optimisticResults]);
 
     // Calculate average-based Maintenance (25% of monthly benefit)
+    // Rounded to nearest 5€ for cleaner pricing (40, 45, 50, 55...)
     const averageBasedMaintenance = useMemo(() => {
-        let maintenance;
+        let rawMaintenance;
         if (realisticResults && optimisticResults) {
             const avgMonthly = (realisticResults.totalBenefitMonthly + optimisticResults.totalBenefitMonthly) / 2;
-            maintenance = Math.round(avgMonthly * 0.25);
+            rawMaintenance = avgMonthly * 0.25;
         } else {
-            maintenance = Math.round(results.totalBenefitMonthly * 0.25);
+            rawMaintenance = results.totalBenefitMonthly * 0.25;
         }
+
+        // Round to nearest 5€ (e.g. 53€ → 55€, 47€ → 45€)
+        const maintenance = Math.round(rawMaintenance / 5) * 5;
+
         // #region agent log
         if (import.meta.env.DEV) {
             fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
@@ -71,8 +76,9 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     location: 'PricingSection.tsx:37',
-                    message: 'Maintenance Calculation',
+                    message: 'Maintenance Calculation (Rounded to 5€)',
                     data: {
+                        rawMaintenance: Math.round(rawMaintenance),
                         maintenance,
                         realisticMonthly: realisticResults ? Math.round(realisticResults.totalBenefitMonthly) : null,
                         optimisticMonthly: optimisticResults ? Math.round(optimisticResults.totalBenefitMonthly) : null,
@@ -101,7 +107,47 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
         setCustomSetup(calculatedSetup);
     }, [calculatedSetup]);
 
-    // Calculate payback
+    // Estado para rastrear se foi seleção manual (para não interferir)
+    const [isManualSelection, setIsManualSelection] = useState(false);
+
+    // AUTO-AJUSTE: Reduzir percentagem automaticamente para garantir payback ≤ 12 meses
+    // Só roda quando dados de input mudam, não quando é seleção manual
+    useEffect(() => {
+        // Se foi seleção manual, não interferir
+        if (isManualSelection) return;
+
+        const monthlyBenefit = results.totalBenefitMonthly;
+        const infraCost = results.totalCostMonthly;
+        const totalMonthlyOutflow = infraCost + averageBasedMaintenance;
+        const netMonthlyGain = monthlyBenefit - totalMonthlyOutflow;
+
+        if (netMonthlyGain <= 0) return; // Não viável, não ajustar
+
+        const strategies: (0.30 | 0.25 | 0.20)[] = [0.30, 0.25, 0.20];
+
+        for (const strategy of strategies) {
+            const setupForStrategy = Math.round(averageYearlyBenefit * strategy);
+            const paybackMonths = Math.ceil(setupForStrategy / netMonthlyGain);
+
+            if (paybackMonths <= 12) {
+                // Encontrou estratégia viável (payback ≤ 12 meses)
+                setPricingStrategy(strategy);
+                return;
+            }
+        }
+
+        // Se nenhuma estratégia permite payback ≤ 12 meses, fica no 20% (mínimo)
+        setPricingStrategy(0.20);
+    }, [averageYearlyBenefit, results.totalBenefitMonthly, results.totalCostMonthly, averageBasedMaintenance, isManualSelection]);
+
+    // Handler para seleção manual de estratégia (reseta o auto-ajuste)
+    const handleStrategySelect = (strategy: 0.20 | 0.25 | 0.30) => {
+        setIsManualSelection(true);
+        setPricingStrategy(strategy);
+    };
+
+    // Calculate payback - ALIGNED with CashflowChart logic
+    // Uses real monthlyData with seasonality, NOT linear approximation
     const paybackData = useMemo(() => {
         const monthlyBenefit = results.totalBenefitMonthly;
         const infraCost = results.totalCostMonthly;
@@ -115,7 +161,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        location: 'PricingSection.tsx:58',
+                        location: 'PricingSection.tsx:paybackData',
                         message: 'Payback Not Viable',
                         data: {
                             monthlyBenefit: Math.round(monthlyBenefit),
@@ -135,21 +181,46 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
             return { months: 0, isViable: false };
         }
 
-        const paybackMonths = Math.ceil(customSetup / netMonthlyGain);
+        // ITERATIVE CALCULATION - same logic as CashflowChart
+        // Uses real monthlyData with seasonality for accurate payback
+        let paybackMonths = 0;
+        if (results.monthlyData && results.monthlyData.length > 0) {
+            // Use monthlyData with real cumulativeProfit (includes seasonality)
+            for (let i = 0; i < results.monthlyData.length; i++) {
+                const monthData = results.monthlyData[i];
+                const cumulativeInvestment = customSetup + (customMaintenance * (i + 1));
+
+                // monthlyData.cumulativeProfit already accounts for seasonality
+                if (monthData.cumulativeProfit >= cumulativeInvestment) {
+                    paybackMonths = i + 1; // 1-indexed (month 1, 2, 3...)
+                    break;
+                }
+            }
+            // If no payback within 12 months, estimate beyond
+            if (paybackMonths === 0) {
+                // Fallback to linear approximation for months > 12
+                paybackMonths = Math.ceil(customSetup / netMonthlyGain);
+            }
+        } else {
+            // Fallback if no monthlyData (shouldn't happen)
+            paybackMonths = Math.ceil(customSetup / netMonthlyGain);
+        }
+
         // #region agent log
         if (import.meta.env.DEV) {
             fetch('http://127.0.0.1:7242/ingest/06be08a1-ac35-45a9-b258-8ec6e4d80378', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    location: 'PricingSection.tsx:62',
-                    message: 'Payback Calculation',
+                    location: 'PricingSection.tsx:paybackData',
+                    message: 'Payback Calculation (Iterative)',
                     data: {
                         customSetup,
                         netMonthlyGain: Math.round(netMonthlyGain),
                         paybackMonths,
                         contractMonths,
                         withinContract: paybackMonths <= contractMonths,
+                        usedMonthlyData: results.monthlyData && results.monthlyData.length > 0,
                         monthlyBenefit: Math.round(monthlyBenefit),
                         totalMonthlyOutflow: Math.round(totalMonthlyOutflow)
                     },
@@ -166,7 +237,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
             isViable: true,
             withinContract: paybackMonths <= contractMonths
         };
-    }, [customSetup, customMaintenance, results.totalBenefitMonthly, results.totalCostMonthly, contractMonths]);
+    }, [customSetup, customMaintenance, results.totalBenefitMonthly, results.totalCostMonthly, results.monthlyData, contractMonths]);
 
     // Total investment for the contract period
     // NOTE: Month 1 = Setup only, Maintenance starts from Month 2
@@ -210,7 +281,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                         {[0.20, 0.25, 0.30].map((strategy) => (
                             <button
                                 key={strategy}
-                                onClick={() => setPricingStrategy(strategy as any)}
+                                onClick={() => handleStrategySelect(strategy as 0.20 | 0.25 | 0.30)}
                                 className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${pricingStrategy === strategy
                                     ? 'bg-white text-blue-600 shadow-sm border border-slate-200'
                                     : 'text-slate-500 hover:text-slate-700'
@@ -276,11 +347,10 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     )}
                 </div>
 
-                {/* Quality Upgrade Card - Value Proposition (Real Market Data) */}
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-200">
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-100">
                     <div className="flex items-center gap-2 mb-4">
                         <TrendingDown className="h-4 w-4 text-emerald-600" />
-                        <h4 className="text-sm font-semibold text-emerald-800">O Que Ganhas (Mesmo Preço, 10x Melhor)</h4>
+                        <h4 className="text-sm font-semibold text-emerald-800">Comparação de Custo</h4>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -304,7 +374,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                         <div className="bg-white/60 rounded-lg p-4 border border-emerald-300">
                             <div className="flex items-center gap-2 mb-2">
                                 <Bot className="h-4 w-4 text-emerald-600" />
-                                <span className="text-xs font-medium text-emerald-700">Nossa Solução IA</span>
+                                <span className="text-xs font-medium text-emerald-700">Assistente IA Voice</span>
                             </div>
                             <p className="text-lg font-bold text-emerald-600">{monthlyEquivalent}€<span className="text-sm font-normal text-slate-400">/mês</span></p>
                             <p className="text-xs text-slate-400 mt-1">
