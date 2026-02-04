@@ -76,13 +76,13 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
           </ResponsiveContainer>
         </div>
 
-        {/* Payback highlight */}
+        {/* ROI highlight - Changed from Payback to avoid confusion with Investment Card */}
         <div className="mt-6 rounded-xl bg-gradient-to-r from-success/10 to-accent/10 p-6 text-center">
           <p className="text-lg text-muted-foreground">
-            O sistema paga-se sozinho em
+            ROI Anual Projetado
           </p>
           <p className="mt-1 text-4xl font-extrabold text-success">
-            {results.paybackMonths} {results.paybackMonths === 1 ? 'mês' : 'meses'}
+            {Math.round(results.roiPercent)}%
           </p>
         </div>
       </CardContent>

@@ -391,58 +391,11 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     {/* Export Button - Transparency for client */}
                     <div className="mt-4 pt-4 border-t border-slate-200 text-center">
                         <button
-                            onClick={() => {
-                                const explanation = `
-PROPOSTA DE INVESTIMENTO - Assistente IA Voice
-================================================
-
-📊 RESUMO DO INVESTIMENTO
---------------------------
-Implementação: ${customSetup}€ (uma vez)
-Manutenção: ${customMaintenance}€/mês
-Contrato: ${contractMonths} meses
-Total: ${totalInvestment}€ (${contractMonths} meses)
-
-💡 COMO CALCULAMOS
-------------------
-IMPLEMENTAÇÃO (${pricingStrategy * 100}% do benefício anual):
-• Benefício anual estimado: ${averageYearlyBenefit.toLocaleString('pt-PT')}€
-• Cálculo: ${averageYearlyBenefit.toLocaleString('pt-PT')}€ × ${pricingStrategy * 100}% = ${customSetup}€
-• Inclui: configuração, treino da IA, integração com agenda
-
-MANUTENÇÃO (25% do benefício mensal, máx 300€):
-• Benefício mensal estimado: ${Math.round(averageYearlyBenefit / 12).toLocaleString('pt-PT')}€
-• Cálculo: ${Math.round(averageYearlyBenefit / 12).toLocaleString('pt-PT')}€ × 25% = ${customMaintenance}€
-• Cobre: suporte técnico, actualizações, monitorização 24/7
-
-📈 RETORNO DO INVESTIMENTO
---------------------------
-• Payback estimado: ${paybackData.months} meses
-• A partir do mês ${paybackData.months + 1}, o sistema gera lucro líquido
-
-⚠️ NOTA IMPORTANTE
-------------------
-Estes valores são estimativas baseadas nos dados que forneceu.
-Os resultados reais podem variar consoante a operação.
-
-Gerado em: ${new Date().toLocaleDateString('pt-PT')}
-                                `.trim();
-
-                                // Create and download text file
-                                const blob = new Blob([explanation], { type: 'text/plain;charset=utf-8' });
-                                const url = URL.createObjectURL(blob);
-                                const a = document.createElement('a');
-                                a.href = url;
-                                a.download = 'proposta_investimento_ia_voice.txt';
-                                document.body.appendChild(a);
-                                a.click();
-                                document.body.removeChild(a);
-                                URL.revokeObjectURL(url);
-                            }}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+                            disabled={true}
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm text-slate-400 bg-slate-100 cursor-not-allowed rounded-lg transition-colors opacity-70"
                         >
                             <FileDown className="h-4 w-4" />
-                            Exportar explicação dos cálculos
+                            Exportar explicação dos cálculos (Em breve)
                         </button>
                     </div>
                 </div>

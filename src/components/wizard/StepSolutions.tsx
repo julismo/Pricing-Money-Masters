@@ -2,6 +2,7 @@ import { PhoneCall, MessageSquare, Zap, ChevronLeft, Star, Receipt } from 'lucid
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 interface StepSolutionsProps {
     onNext: (type: 'voice' | 'chat' | 'both') => void;
@@ -25,15 +26,15 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
             <div className="grid md:grid-cols-3 gap-6">
                 {/* Card: Atendente de Voz (Active - Production) */}
                 <Card
-                    className="p-8 relative border-2 border-primary shadow-xl cursor-pointer bg-white transition-all hover:scale-[1.02] ring-4 ring-blue-50/50 group"
+                    className="p-8 relative border border-primary/40 shadow-lg cursor-pointer bg-white transition-all duration-200 hover:shadow-xl hover:border-primary ring-2 ring-primary/10 hover:ring-primary/20 group"
                     onClick={() => onNext('voice')}
                 >
                     <div className="flex flex-col items-start gap-6">
-                        <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                             <PhoneCall className="h-6 w-6 text-primary" />
                         </div>
                         <div className="text-left space-y-2">
-                            <h3 className="text-lg font-bold text-slate-900">Atendente de Voz</h3>
+                            <h3 className="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors">Atendente de Voz</h3>
                             <p className="text-sm text-slate-500 leading-relaxed">
                                 Atende chamadas, agenda serviços e tira dúvidas 24/7 com voz humana.
                             </p>
@@ -43,16 +44,21 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
 
                 {/* Card: Chatbot IA (Beta - Enabled) */}
                 <Card
-                    className="p-8 relative border-2 border-slate-100 shadow-lg cursor-pointer bg-white transition-all hover:scale-[1.02] hover:border-primary hover:ring-4 hover:ring-blue-50 overflow-hidden"
-                    onClick={() => onNext('chat')}
+                    className="p-8 relative border border-slate-200 shadow-md cursor-pointer bg-white transition-all duration-200 hover:shadow-lg hover:border-primary/40 hover:ring-2 hover:ring-primary/10 overflow-hidden group"
+                    onClick={() => {
+                        // onNext('chat') // Temporarily disabled
+                        toast.info("Funcionalidade Indisponível", {
+                            description: "Esta opção encontra-se temporariamente indisponível. Estamos a trabalhar para a disponibilizar brevemente."
+                        });
+                    }}
                 >
                     <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200 z-10">Beta</Badge>
-                    <div className="flex flex-col items-start gap-6 pt-2">
-                        <div className="h-12 w-12 rounded-lg bg-amber-50 flex items-center justify-center">
+                    <div className="flex flex-col items-start gap-6">
+                        <div className="h-12 w-12 rounded-lg bg-amber-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
                             <MessageSquare className="h-6 w-6 text-amber-600" />
                         </div>
                         <div className="text-left space-y-2">
-                            <h3 className="text-lg font-bold text-slate-900">Chatbot IA</h3>
+                            <h3 className="text-lg font-bold text-slate-900 group-hover:text-amber-700 transition-colors">Chatbot IA</h3>
                             <p className="text-sm text-slate-500 leading-relaxed">
                                 Responde automaticamente no WhatsApp e Instagram Direct.
                             </p>
@@ -60,15 +66,12 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
                     </div>
                 </Card>
 
-                {/* Card: Combo (Beta - Enabled) */}
-                <Card
-                    className="p-8 relative border-2 border-slate-100 shadow-lg cursor-pointer bg-white transition-all hover:scale-[1.02] hover:border-primary hover:ring-4 hover:ring-blue-50 overflow-hidden"
-                    onClick={() => onNext('both')}
-                >
-                    <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-200 z-10">Beta</Badge>
+                {/* Card: Combo (Disabled - Futuro) */}
+                <Card className="p-8 relative border border-slate-200 shadow-sm cursor-not-allowed bg-white opacity-60 grayscale overflow-hidden">
+                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Futuro</Badge>
                     <div className="flex flex-col items-start gap-6 pt-2">
-                        <div className="h-12 w-12 rounded-lg bg-amber-50 flex items-center justify-center">
-                            <Zap className="h-6 w-6 text-amber-600" />
+                        <div className="h-12 w-12 rounded-lg bg-slate-50 flex items-center justify-center">
+                            <Zap className="h-6 w-6 text-slate-400" />
                         </div>
                         <div className="text-left space-y-2">
                             <h3 className="text-lg font-bold text-slate-900">Combo (Voz + Chat)</h3>
@@ -80,8 +83,8 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
                 </Card>
 
                 {/* Card: Gestão de Reviews (Disabled) */}
-                <Card className="p-8 relative opacity-60 border border-slate-200 shadow-sm cursor-not-allowed bg-white grayscale overflow-hidden">
-                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Em breve</Badge>
+                <Card className="p-8 relative border border-slate-200 shadow-sm cursor-not-allowed bg-white opacity-60 grayscale overflow-hidden">
+                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Futuro</Badge>
                     <div className="flex flex-col items-start gap-6 pt-2">
                         <div className="h-12 w-12 rounded-lg bg-slate-50 flex items-center justify-center">
                             <Star className="h-6 w-6 text-slate-400" />
@@ -96,8 +99,8 @@ export function StepSolutions({ onNext, onBack }: StepSolutionsProps) {
                 </Card>
 
                 {/* Card: Faturação (Disabled) */}
-                <Card className="p-8 relative opacity-60 border border-slate-200 shadow-sm cursor-not-allowed bg-white grayscale overflow-hidden">
-                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Em breve</Badge>
+                <Card className="p-8 relative border border-slate-200 shadow-sm cursor-not-allowed bg-white opacity-60 grayscale overflow-hidden">
+                    <Badge variant="secondary" className="absolute top-4 right-4 bg-slate-100 text-slate-500 z-10">Futuro</Badge>
                     <div className="flex flex-col items-start gap-6 pt-2">
                         <div className="h-12 w-12 rounded-lg bg-slate-50 flex items-center justify-center">
                             <Receipt className="h-6 w-6 text-slate-400" />
