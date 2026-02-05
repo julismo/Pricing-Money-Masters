@@ -282,7 +282,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
     // Config inputs are hidden in Otimista mode
 
     return (
-        <Card className="card-shadow-lg mt-4 border-0">
+        <Card className="relative overflow-hidden rounded-2xl border border-white/20 bg-white/30 backdrop-blur-xl shadow-xl mt-4">
             <CardHeader className="pb-2">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                     <CardTitle className="flex items-center gap-2 text-slate-700 text-lg">
@@ -309,12 +309,15 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
             </CardHeader>
             <CardContent className="space-y-4">
                 {/* Main Display - Client sees this */}
-                <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-xl p-6 border border-slate-100">
-                    <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white/40 rounded-xl p-6 border border-white/40 shadow-sm relative overflow-hidden">
+                    {/* Subtle gradient overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+
+                    <div className="grid grid-cols-3 gap-4 relative z-10">
                         {/* Setup Cost */}
                         <div className="text-center">
-                            <div className="flex items-center justify-center gap-1 mb-1">
-                                <p className="text-sm text-slate-500">Implementação</p>
+                            <div className="flex items-center justify-center gap-1 mb-2">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Implementação</p>
                                 <TooltipProvider>
                                     <Tooltip delayDuration={200}>
                                         <TooltipTrigger asChild>
@@ -328,7 +331,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                                     </Tooltip>
                                 </TooltipProvider>
                             </div>
-                            <p className="text-2xl font-bold text-slate-800">
+                            <p className="text-3xl font-bold text-slate-800 tabular-nums tracking-tight">
                                 {customSetup}€
                             </p>
                             <p className="text-xs text-slate-400">uma vez</p>
@@ -336,8 +339,8 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
 
                         {/* Maintenance Fee (Consultant) */}
                         <div className="text-center">
-                            <div className="flex items-center justify-center gap-1 mb-1">
-                                <p className="text-sm text-slate-500">Manutenção</p>
+                            <div className="flex items-center justify-center gap-1 mb-2">
+                                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Manutenção</p>
                                 <TooltipProvider>
                                     <Tooltip delayDuration={200}>
                                         <TooltipTrigger asChild>
@@ -351,7 +354,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                                     </Tooltip>
                                 </TooltipProvider>
                             </div>
-                            <p className="text-2xl font-bold text-slate-800">
+                            <p className="text-3xl font-bold text-slate-800 tabular-nums tracking-tight">
                                 {customMaintenance > 0 ? `${customMaintenance}€` : '—'}
                             </p>
                             <p className="text-xs text-slate-400">por mês</p>
@@ -359,8 +362,8 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
 
                         {/* Contract Duration */}
                         <div className="text-center">
-                            <p className="text-sm text-slate-500 mb-1">Contrato</p>
-                            <p className="text-2xl font-bold text-slate-800">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Contrato</p>
+                            <p className="text-3xl font-bold text-slate-800 tabular-nums tracking-tight">
                                 {contractMonths}
                             </p>
                             <p className="text-xs text-slate-400">meses</p>
@@ -369,36 +372,38 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
 
                     {/* Payback info */}
                     {paybackData.isViable && (
-                        <div className="mt-6 pt-4 border-t border-slate-200 text-center">
+                        <div className="mt-8 pt-6 border-t border-slate-200/50 text-center relative z-10">
                             <div className="flex items-center justify-center gap-2 text-green-600">
                                 <Clock className="h-4 w-4" />
                                 <span className="text-sm font-medium">
                                     Recuperas o investimento em{' '}
-                                    <span className="font-bold">
+                                    <span className="font-bold tabular-nums">
                                         {paybackData.months} {paybackData.months === 1 ? 'mês' : 'meses'}
                                     </span>
                                 </span>
                             </div>
                             {totalInvestment > 0 && (
                                 <p className="text-xs text-slate-400 mt-1">
-                                    Investimento total: {totalInvestment}€ em {contractMonths} meses
+                                    Investimento total: <span className="tabular-nums font-medium">{totalInvestment}€</span> em <span className="tabular-nums">{contractMonths}</span> meses
                                 </p>
                             )}
 
                             {/* Consultant Config Toggle - Moved inside Payback section */}
                             {results.mode === 'tempo' && (
-                                <button
-                                    onClick={() => setShowConfig(!showConfig)}
-                                    className="flex items-center justify-center gap-2 w-full mt-3 py-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-                                >
-                                    {showConfig ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                                    {showConfig ? 'Fechar configuração' : 'Ajustar valores'}
-                                </button>
+                                <div className="flex justify-center mt-4">
+                                    <button
+                                        onClick={() => setShowConfig(!showConfig)}
+                                        className="flex items-center gap-2 px-4 py-1.5 text-xs font-medium text-slate-500 bg-white/50 hover:bg-white/80 border border-white/40 rounded-full transition-all shadow-sm hover:shadow active:scale-95"
+                                    >
+                                        {showConfig ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                        {showConfig ? 'Fechar configuração' : 'Ajustar valores'}
+                                    </button>
+                                </div>
                             )}
 
                             {/* Consultant Config Panel - Moved inside Payback section */}
                             {results.mode === 'tempo' && showConfig && (
-                                <div className="mt-4 bg-slate-50/50 rounded-lg p-4 border border-slate-100 text-left">
+                                <div className="mt-4 bg-white/40 rounded-xl p-4 border border-white/30 text-left shadow-inner">
                                     <p className="text-xs text-slate-500 mb-3 flex items-center gap-1">
                                         <Calendar className="h-3 w-3" />
                                         Configuração do consultor
@@ -454,7 +459,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                     </div>
                 </div>
 
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl p-5 border border-emerald-100">
+                <div className="bg-emerald-50/30 rounded-xl p-5 border border-emerald-100/50 backdrop-blur-sm">
                     <div className="flex items-center gap-2 mb-4">
                         <TrendingDown className="h-4 w-4 text-emerald-600" />
                         <h4 className="text-sm font-semibold text-emerald-800">Comparação de Custo</h4>
@@ -464,35 +469,35 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                         {/* Receptionist Comparison - Portugal barbershop context */}
                         {/* Google/Perplexity: SMN €870 + TSU ~€207 + overhead = ~€1.100-1.400 */}
                         {/* Using €800-1.200 (bruto range) for simpler client communication */}
-                        <div className="bg-white/60 rounded-lg p-4 border border-slate-200">
+                        <div className="bg-white/40 rounded-xl p-4 border border-white/40 shadow-sm backdrop-blur-md">
                             <div className="flex items-center gap-2 mb-2">
                                 <User className="h-4 w-4 text-slate-500" />
-                                <span className="text-xs font-medium text-slate-600">Recepcionista</span>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Recepcionista</span>
                             </div>
-                            <p className="text-lg font-bold text-slate-700">€800-1.200<span className="text-sm font-normal text-slate-400">/mês</span></p>
+                            <p className="text-xl font-bold text-slate-700 tabular-nums tracking-tight">€800-1.200<span className="text-sm font-normal text-slate-400 ml-1">/mês</span></p>
                             <p className="text-xs text-slate-400 mt-1">(Base + TSU + subsídios)</p>
-                            <ul className="text-xs text-slate-400 mt-2 space-y-1">
-                                <li>❌ Só horário comercial</li>
-                                <li>❌ Faltas e férias</li>
-                                <li>❌ Erros de agendamento</li>
+                            <ul className="text-xs text-slate-500 mt-3 space-y-1.5">
+                                <li className="flex items-center gap-2 opacity-70"><span className="text-red-400">✕</span> Só horário comercial</li>
+                                <li className="flex items-center gap-2 opacity-70"><span className="text-red-400">✕</span> Faltas e férias</li>
+                                <li className="flex items-center gap-2 opacity-70"><span className="text-red-400">✕</span> Erros de agendamento</li>
                             </ul>
                         </div>
 
                         {/* AI Voice Agent */}
-                        <div className="bg-white/60 rounded-lg p-4 border border-emerald-300">
+                        <div className="bg-gradient-to-br from-white/60 to-emerald-50/60 rounded-xl p-4 border border-emerald-200/50 shadow-[0_0_20px_-5px_rgba(16,185,129,0.15)] ring-1 ring-emerald-100 backdrop-blur-md">
                             <div className="flex items-center gap-2 mb-2">
                                 <Bot className="h-4 w-4 text-emerald-600" />
-                                <span className="text-xs font-medium text-emerald-700">Assistente IA Voice</span>
+                                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Assistente IA Voice</span>
                             </div>
-                            <p className="text-lg font-bold text-emerald-600">{monthlyEquivalent}€<span className="text-sm font-normal text-slate-400">/mês</span></p>
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xl font-bold text-emerald-600 tabular-nums tracking-tight">{monthlyEquivalent}€<span className="text-sm font-normal text-emerald-600/60 ml-1">/mês</span></p>
+                            <p className="text-xs text-emerald-600/60 mt-1 tabular-nums">
                                 ({customSetup}€{customMaintenance > 0 && maintenanceMonths > 0 ? ` + ${customMaintenance}€×${maintenanceMonths}` : ''}) ÷ {contractMonths}
                             </p>
-                            <ul className="text-xs text-emerald-600 mt-2 space-y-1">
-                                <li>✅ 24h/7 dias/365 dias</li>
-                                <li>✅ Consistência alta</li>
-                                <li>✅ Sem faltas/férias</li>
-                                <li>✅ Resposta imediata</li>
+                            <ul className="text-xs text-emerald-700 mt-3 space-y-1.5">
+                                <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> 24h/7 dias/365 dias</li>
+                                <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Consistência alta</li>
+                                <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Sem faltas/férias</li>
+                                <li className="flex items-center gap-2"><span className="text-emerald-500">✓</span> Resposta imediata</li>
                             </ul>
                         </div>
                     </div>
