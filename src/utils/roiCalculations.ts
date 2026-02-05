@@ -163,9 +163,29 @@ export function calculateUnifiedROI(
     // Revenue from additional clients (Ticket Médio * Novos Clientes)
     const revenueFromOpportunity = newClients * data.averageTicket;
 
-    // 6. Limitação de Capacidade (só no modo TEMPO)
-    // Agora a receita final é a SOMA dos dois vetores (Tempo + Oportunidade)
-    let finalRevenue = revenueFromTime + revenueFromOpportunity;
+    // 6. Impacto de No-Show (Realismo)
+    // A IA ajuda a reduzir No-Show (Lembretes SMS/WPP), mas não elimina 100%.
+    // Assumimos que a IA reduz o No-Show pela metade (Fator 0.5).
+    // O restante ainda é perda de receita.
+
+    // Default No-Show Rate: 0% if not provided, capped at input
+    const baseNoShowRate = data.noShowRate ? (data.noShowRate / 100) : 0;
+
+    // Factor: Quanto a IA reduz do No-Show atual? (Benchmark: 40-50% reduction)
+    const aiNoShowReductionFactor = 0.50;
+
+    // Taxa de No-Show FINAL com IA (O que ainda perdemos)
+    // Ex: Tinha 20%, IA resolve 50%, sobra 10% de No-Show.
+    const remainingNoShowRate = baseNoShowRate * (1 - aiNoShowReductionFactor);
+
+    // Aplicar desconto de No-Show na Receita Projetada
+    // (Tanto nos novos clientes quanto nos agendamentos extras pelo tempo poupado)
+    const revenueFromTimeAdjusted = revenueFromTime * (1 - remainingNoShowRate);
+    const revenueFromOpportunityAdjusted = revenueFromOpportunity * (1 - remainingNoShowRate);
+
+    // 7. Limitação de Capacidade
+    // Agora a receita final é a SOMA dos dois vetores ajustados
+    let finalRevenue = revenueFromTimeAdjusted + revenueFromOpportunityAdjusted;
 
     if (assumptions.capacityLimit) {
         // Assume 8h/dia de trabalho

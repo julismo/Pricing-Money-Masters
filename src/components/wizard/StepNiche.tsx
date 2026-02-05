@@ -1,4 +1,5 @@
-import { Scissors, Stethoscope, Utensils, Car, ChevronLeft } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import { AnimatedScissors, AnimatedStethoscope, AnimatedUtensils } from '@/components/ui/CustomIcons';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -31,8 +32,8 @@ export function StepNiche({ onNext, onBack }: StepNicheProps) {
         >
           <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-200" />
           <div className="relative flex flex-col items-start gap-5">
-            <div className="h-14 w-14 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-              <Scissors className="h-7 w-7 text-primary" />
+            <div className="h-14 w-14 rounded-xl bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
+              <AnimatedScissors className="h-7 w-7 text-primary" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-slate-900 group-hover:text-primary transition-colors">Barbearia</h3>
@@ -50,8 +51,8 @@ export function StepNiche({ onNext, onBack }: StepNicheProps) {
         >
           <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100 transition-colors">Beta</Badge>
           <div className="relative flex flex-col items-start gap-5">
-            <div className="h-14 w-14 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-              <Stethoscope className="h-7 w-7 text-amber-600" />
+            <div className="h-14 w-14 rounded-xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
+              <AnimatedStethoscope className="h-7 w-7 text-amber-600" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-slate-900 group-hover:text-amber-700 transition-colors">Clínica</h3>
@@ -75,8 +76,8 @@ export function StepNiche({ onNext, onBack }: StepNicheProps) {
         >
           <Badge className="absolute top-4 right-4 bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100 transition-colors">Beta</Badge>
           <div className="relative flex flex-col items-start gap-5">
-            <div className="h-14 w-14 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-105 transition-transform duration-200">
-              <Utensils className="h-7 w-7 text-rose-600" />
+            <div className="h-14 w-14 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300 ease-out">
+              <AnimatedUtensils className="h-7 w-7 text-rose-600" />
             </div>
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-slate-900 group-hover:text-rose-700 transition-colors">Restaurante</h3>

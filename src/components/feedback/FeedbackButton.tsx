@@ -112,18 +112,6 @@ export function FeedbackButton() {
                             </p>
                         </div>
 
-                        {/* Links / Files */}
-                        <div className="space-y-2">
-                            <Label htmlFor="links">Links / Arquivos (Loom, Imagens, Drive)</Label>
-                            <Input
-                                id="links"
-                                type="text"
-                                placeholder="Cola aqui links de vídeos, prints ou documentos..."
-                                value={links}
-                                onChange={(e) => setLinks(e.target.value)}
-                            />
-                        </div>
-
                         {/* Feedback Text */}
                         <div className="space-y-2">
                             <Label htmlFor="feedback">Feedback *</Label>
@@ -132,11 +120,22 @@ export function FeedbackButton() {
                                 placeholder="Descreva a sua experiência, sugestão ou problema..."
                                 value={feedback}
                                 onChange={(e) => setFeedback(e.target.value)}
-                                rows={5}
+                                className="min-h-[100px]"
                                 required
                             />
                         </div>
 
+                        {/* Links / Files */}
+                        <div className="space-y-2">
+                            <Label htmlFor="links">Vídeo Loom</Label>
+                            <Input
+                                id="links"
+                                type="text"
+                                placeholder="Cola aqui o link do vídeo..."
+                                value={links}
+                                onChange={(e) => setLinks(e.target.value)}
+                            />
+                        </div>
 
 
                         {/* Submit Button */}
