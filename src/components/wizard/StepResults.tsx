@@ -93,7 +93,7 @@ export function StepResults({ realistic, optimistic, onRecalculate }: StepResult
 
             <ResultsCards results={activeResults} />
 
-            <div className="space-y-4">
+            <div className="space-y-4 mt-32">
                 <div className="flex justify-center bg-slate-100 p-1 rounded-lg w-fit mx-auto">
                     <button
                         onClick={() => setChartTab('annual')}

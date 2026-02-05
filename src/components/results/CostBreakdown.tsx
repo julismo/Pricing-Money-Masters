@@ -33,14 +33,16 @@ export function CostBreakdown({ costBreakdown, serverTier, totalCostMonthly }: C
             value: costBreakdown.server,
             color: 'text-slate-600',
             bgColor: 'bg-slate-100',
+            barColor: 'bg-slate-500',
         },
         {
             icon: Phone,
             label: 'Twilio',
             sublabel: 'Número PT',
             value: costBreakdown.twilioNumber,
-            color: 'text-red-600',
-            bgColor: 'bg-red-50',
+            color: 'text-rose-600',
+            bgColor: 'bg-rose-50',
+            barColor: 'bg-rose-500',
         },
         {
             icon: Bot,
@@ -49,6 +51,7 @@ export function CostBreakdown({ costBreakdown, serverTier, totalCostMonthly }: C
             value: costBreakdown.retellAI,
             color: 'text-violet-600',
             bgColor: 'bg-violet-50',
+            barColor: 'bg-violet-500',
         },
         {
             icon: MessageSquare,
@@ -57,11 +60,12 @@ export function CostBreakdown({ costBreakdown, serverTier, totalCostMonthly }: C
             value: costBreakdown.sms,
             color: 'text-emerald-600',
             bgColor: 'bg-emerald-50',
+            barColor: 'bg-emerald-500',
         },
     ];
 
     return (
-        <div className="mt-4">
+        <div className="w-full">
             {/* Toggle Button */}
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -134,11 +138,11 @@ export function CostBreakdown({ costBreakdown, serverTier, totalCostMonthly }: C
                                     </div>
 
                                     {/* Progress bar */}
-                                    <div className="mt-2 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                    <div className="mt-2 h-2 bg-slate-100/80 rounded-full overflow-hidden">
                                         <div
                                             className={cn(
                                                 "h-full rounded-full transition-all duration-500",
-                                                cost.color.replace('text-', 'bg-')
+                                                cost.barColor
                                             )}
                                             style={{ width: `${percentage}%` }}
                                         />

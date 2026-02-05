@@ -385,6 +385,60 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                                 </p>
                             )}
 
+                            {/* Consultant Config Toggle - Moved inside Payback section */}
+                            {results.mode === 'tempo' && (
+                                <button
+                                    onClick={() => setShowConfig(!showConfig)}
+                                    className="flex items-center justify-center gap-2 w-full mt-3 py-1 text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                                >
+                                    {showConfig ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                    {showConfig ? 'Fechar configuração' : 'Ajustar valores'}
+                                </button>
+                            )}
+
+                            {/* Consultant Config Panel - Moved inside Payback section */}
+                            {results.mode === 'tempo' && showConfig && (
+                                <div className="mt-4 bg-slate-50/50 rounded-lg p-4 border border-slate-100 text-left">
+                                    <p className="text-xs text-slate-500 mb-3 flex items-center gap-1">
+                                        <Calendar className="h-3 w-3" />
+                                        Configuração do consultor
+                                    </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div>
+                                            <label className="text-xs text-slate-500">Setup (€)</label>
+                                            <Input
+                                                type="number"
+                                                value={customSetup}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomSetup(Number(e.target.value) || 0)}
+                                                className="mt-1 h-8 text-xs"
+                                                min={0}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-500">Manutenção (€/mês)</label>
+                                            <Input
+                                                type="number"
+                                                value={customMaintenance}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomMaintenance(Number(e.target.value) || 0)}
+                                                className="mt-1 h-8 text-xs"
+                                                min={0}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs text-slate-500">Contrato (meses)</label>
+                                            <Input
+                                                type="number"
+                                                value={contractMonths}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContractMonths(Number(e.target.value) || 12)}
+                                                className="mt-1 h-8 text-xs"
+                                                min={1}
+                                                max={36}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     )}
 
@@ -468,59 +522,7 @@ export function PricingSection({ results, realisticResults, optimisticResults, o
                 </div>
 
 
-                {/* Consultant Config Toggle - Only in Realista mode */}
-                {results.mode === 'tempo' && (
-                    <button
-                        onClick={() => setShowConfig(!showConfig)}
-                        className="flex items-center justify-center gap-2 w-full py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-                    >
-                        {showConfig ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                        {showConfig ? 'Fechar configuração' : 'Ajustar valores'}
-                    </button>
-                )}
 
-                {/* Consultant Config Panel - Only in Realista mode */}
-                {results.mode === 'tempo' && showConfig && (
-                    <div className="bg-slate-100 rounded-lg p-4 border border-slate-200">
-                        <p className="text-xs text-slate-500 mb-3 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            Configuração do consultor
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label className="text-xs text-slate-500">Setup (€)</label>
-                                <Input
-                                    type="number"
-                                    value={customSetup}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomSetup(Number(e.target.value) || 0)}
-                                    className="mt-1"
-                                    min={0}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs text-slate-500">Manutenção (€/mês)</label>
-                                <Input
-                                    type="number"
-                                    value={customMaintenance}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCustomMaintenance(Number(e.target.value) || 0)}
-                                    className="mt-1"
-                                    min={0}
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs text-slate-500">Contrato (meses)</label>
-                                <Input
-                                    type="number"
-                                    value={contractMonths}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContractMonths(Number(e.target.value) || 12)}
-                                    className="mt-1"
-                                    min={1}
-                                    max={36}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                )}
             </CardContent>
         </Card>
     );
