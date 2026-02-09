@@ -11,17 +11,17 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
     {
       name: 'Perde sem sistema',
       value: Math.round(results.totalBenefitYearly),
-      color: 'hsl(0 84% 60%)',
+      color: '#fb7185', // rose-400
     },
     {
       name: 'Custo do sistema',
       value: Math.round(results.totalCostYearly),
-      color: 'hsl(224 76% 33%)',
+      color: '#475569', // slate-600
     },
     {
       name: 'Lucro líquido',
       value: Math.round(results.netProfitYearly),
-      color: results.netProfitYearly >= 0 ? 'hsl(160 84% 39%)' : 'hsl(0 84% 60%)', // Green or Red
+      color: results.netProfitYearly >= 0 ? '#10b981' : '#fb7185', // emerald-500 or rose-400
     },
   ];
 
@@ -41,9 +41,12 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
     : `${monthsToPayback} Meses`;
 
   return (
-    <Card className="p-6">
-      <h3 className="text-center text-lg font-semibold mb-6">Comparação Anual</h3>
-      <div className="h-[300px] w-full">
+    <Card className="relative overflow-hidden rounded-2xl border border-white/40 bg-white/40 backdrop-blur-md shadow-sm p-6">
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+
+      <h3 className="relative z-10 text-center text-lg font-semibold mb-6 text-slate-700">Comparação Anual</h3>
+      <div className="h-[300px] w-full relative z-10">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -55,8 +58,10 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
             <YAxis
               dataKey="name"
               type="category"
-              width={100}
-              tick={{ fontSize: 12 }}
+              width={130}
+              tick={{ fontSize: 12, fill: '#64748b' }} // slate-500
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip
               cursor={{ fill: 'transparent' }}
@@ -96,12 +101,12 @@ export function ComparisonChart({ results }: ComparisonChartProps) {
         </ResponsiveContainer>
       </div>
 
-      <div className="mt-6 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 p-6 text-center">
+      <div className="mt-6 rounded-xl bg-gradient-to-r from-emerald-50/50 to-teal-50/50 border border-emerald-100/50 p-6 text-center relative z-10 backdrop-blur-sm">
         <div className="flex flex-col items-center justify-center gap-1">
-          <p className="text-lg font-medium text-emerald-700">
+          <p className="text-sm font-medium text-emerald-600 uppercase tracking-wider">
             O sistema paga-se em
           </p>
-          <p className="text-3xl font-bold text-emerald-600">
+          <p className="text-3xl font-bold text-emerald-600 tracking-tight">
             {monthsToPayback <= 1 ? '1 Mês' : `${monthsToPayback} Meses`}
           </p>
         </div>

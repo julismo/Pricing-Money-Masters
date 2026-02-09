@@ -45,22 +45,25 @@ export function ResultsCards({ results }: ResultsCardsProps) {
       )}
 
       {/* Current Situation Card */}
-      <Card className="shadow-sm border border-slate-200">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-slate-600 text-lg">
+      <Card className="relative overflow-hidden rounded-2xl border border-slate-200/60 bg-white/60 backdrop-blur-md shadow-sm ring-1 ring-slate-100/50">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent pointer-events-none" />
+
+        <CardHeader className="pb-2 relative z-10">
+          <CardTitle className="flex items-center gap-2 text-slate-700 text-lg">
             <TrendingDown className="h-5 w-5 text-rose-500" />
             Situação Atual
           </CardTitle>
         </CardHeader>
         <CardContent>
           {/* Row 1: Volume metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 relative z-10">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/50 border border-white/30 shadow-sm">
                 <Phone className="h-5 w-5 text-slate-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-slate-900 tabular-nums tracking-tight">
                   <AnimatedNumber value={results.callsPerMonth} />
                 </p>
                 <p className="text-sm text-slate-500">chamadas recebidas</p>
@@ -68,11 +71,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50/50 border border-rose-100/50 shadow-sm">
                 <Phone className="h-5 w-5 text-rose-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-rose-600">
+                <p className="text-2xl font-bold text-rose-600 tabular-nums tracking-tight">
                   ~<AnimatedNumber value={Math.round(results.missedCalls)} />
                 </p>
                 <p className="text-sm text-rose-600/80">não atendidas</p>
@@ -80,11 +83,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/50 border border-white/30 shadow-sm">
                 <Clock className="h-5 w-5 text-slate-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-slate-900 tabular-nums tracking-tight">
                   <AnimatedNumber value={results.hoursLost} decimals={1} suffix="h" />
                 </p>
                 <p className="text-sm text-slate-500">em atendimento</p>
@@ -93,13 +96,13 @@ export function ResultsCards({ results }: ResultsCardsProps) {
           </div>
 
           {/* Row 2: Financial metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6 border-t border-slate-200/40 relative z-10">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/50 border border-white/30 shadow-sm">
                 <Scissors className="h-5 w-5 text-slate-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-slate-900 tabular-nums tracking-tight">
                   <AnimatedNumber value={results.cutsLost} decimals={1} />
                 </p>
                 <p className="text-sm text-slate-500">{labels.lost}</p>
@@ -107,11 +110,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50/50 border border-rose-100/50 shadow-sm">
                 <DollarSign className="h-5 w-5 text-rose-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-rose-600">
+                <p className="text-2xl font-bold text-rose-600 tabular-nums tracking-tight">
                   ~<AnimatedNumber
                     value={Math.round(
                       results.totalBenefitMonthly * (results.startMonthSeasonalityFactor || 1.0)
@@ -127,11 +130,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-50/50 border border-rose-100/50 shadow-sm">
                 <TrendingDown className="h-5 w-5 text-rose-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-rose-600">
+                <p className="text-2xl font-bold text-rose-600 tabular-nums tracking-tight">
                   ~<AnimatedNumber value={Math.round(results.totalBenefitYearly)} suffix="€" />
                   <span className="text-sm ml-1 text-rose-600/60 font-normal">/ano</span>
                 </p>
@@ -143,9 +146,9 @@ export function ResultsCards({ results }: ResultsCardsProps) {
       </Card>
 
       {/* With System Card */}
-      <Card className="shadow-md border border-emerald-500/30 bg-white ring-4 ring-emerald-50/50">
-        <CardHeader className="pb-2 border-b border-emerald-100/50 bg-emerald-50/30">
-          <CardTitle className="flex items-center gap-2 text-emerald-700">
+      <Card className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-br from-white to-emerald-50/50 backdrop-blur-xl shadow-xl mt-8 ring-1 ring-emerald-50">
+        <CardHeader className="pb-2 border-b border-emerald-100/50 bg-emerald-50/20">
+          <CardTitle className="flex items-center gap-2 text-emerald-800 text-lg">
             <TrendingUp className="h-5 w-5" />
             Com o Sistema Activo 24/7
           </CardTitle>
@@ -153,11 +156,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 border border-slate-100">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/60 border border-slate-200/50 shadow-sm">
                 <DollarSign className="h-6 w-6 text-slate-600" />
               </div>
               <div>
-                <p className="text-xl font-bold text-slate-700">
+                <p className="text-xl font-bold text-slate-700 tabular-nums tracking-tight">
                   <AnimatedNumber value={results.totalCostMonthly} decimals={2} suffix="€" />
                   <span className="text-sm ml-1 text-slate-400 font-normal">/mês</span>
                 </p>
@@ -168,11 +171,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/60 border border-emerald-200/50 shadow-sm">
                 <TrendingUp className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-xl font-bold text-emerald-700">
+                <p className="text-xl font-bold text-emerald-700 tabular-nums tracking-tight">
                   <AnimatedNumber value={Math.round(results.totalBenefitMonthly)} suffix="€" />
                   <span className="text-sm ml-1 text-emerald-600/60 font-normal">/mês</span>
                 </p>
@@ -183,11 +186,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 border border-emerald-100">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/60 border border-emerald-200/50 shadow-sm">
                 <CheckCircle2 className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-emerald-700">
+                <p className="text-2xl font-bold text-emerald-700 tabular-nums tracking-tight">
                   <AnimatedNumber value={Math.round(results.netProfitYearly)} suffix="€" />
                   <span className="text-sm ml-1 text-emerald-600/60 font-normal">/ano</span>
                 </p>
@@ -196,11 +199,11 @@ export function ResultsCards({ results }: ResultsCardsProps) {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-900 shadow-xl shadow-slate-900/10">
                 <Rocket className="h-6 w-6 text-white" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-slate-900">
+                <p className="text-2xl font-bold text-slate-900 tabular-nums tracking-tight">
                   <AnimatedNumber value={Math.round(results.roiPercent)} suffix="%" />
                 </p>
                 <p className="text-sm text-slate-500">ROI</p>

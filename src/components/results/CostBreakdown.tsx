@@ -70,7 +70,7 @@ export function CostBreakdown({ costBreakdown, serverTier, totalCostMonthly }: C
             <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className={cn(
-                    "w-full flex items-center justify-between px-4 py-2 rounded-lg transition-all",
+                    "w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all",
                     "text-sm font-medium text-slate-600 hover:text-slate-900",
                     "bg-slate-50 hover:bg-slate-100 border border-slate-200",
                     isExpanded && "bg-slate-100 border-slate-300"
